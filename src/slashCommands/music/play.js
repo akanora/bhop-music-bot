@@ -1,6 +1,7 @@
 module.exports = {
   name: 'play',
-  description: 'Plays and enqueues track(s) of the query provided.',
+  description:
+    'Plays the specified song from YouTube, Soundcloud, Spotify etc.',
   usage: '', //OPTIONAL (for the help cmd)
   examples: [], //OPTIONAL (for the help cmd)
   dir: 'music',
@@ -13,7 +14,7 @@ module.exports = {
       type: 3,
       required: true,
     },
-  ], // OPTIONAL, (/) command options ; read https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure
+  ],
 
   run: async (client, interaction) => {
     const channel = interaction.member.voice.channel
