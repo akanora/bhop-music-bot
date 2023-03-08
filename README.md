@@ -33,9 +33,9 @@ npm start
 If you'd like to contribute to this project, please follow these steps:
 
 1. Fork this repository.
-2. Create a new branch (git checkout -b feature/my-new-feature).
-3. Commit your changes (git commit -am 'Add some feature').
-4. Push to the branch (git push origin feature/my-new-feature).
+2. Create a new branch `(git checkout -b feature/my-new-feature).`
+3. Commit your changes `(git commit -am 'Add some feature').`
+4. Push to the branch `(git push origin feature/my-new-feature).`
 5. Create a new Pull Request.
 
 ## License
