@@ -44,10 +44,12 @@ module.exports = {
       await message.react('⬅️')
       await message.react('➡️')
 
-      const filter = (reaction, user) =>
-        ['⬅️', '➡️'].includes(reaction.emoji.name) &&
-        user.id === interaction.user.id
-      const collector = message.createReactionCollector(filter, { time: 60000 })
+      const collector = message.createReactionCollector({
+        filter: (reaction, user) =>
+          ['⬅️', '➡️'].includes(reaction.emoji.name) &&
+          user.id === interaction.user.id,
+        time: 60000,
+      })
 
       collector.on('collect', async (reaction) => {
         if (reaction.emoji.name === '⬅️') {
@@ -82,7 +84,9 @@ module.exports = {
         await message.edit({ embeds: [newEmbed] })
       })
 
-      collector.on('end', () => message.reactions.removeAll())
+      collector.on('end', () => {
+        message.reactions.removeAll().catch(() => {})
+      })
     }
   },
 }
