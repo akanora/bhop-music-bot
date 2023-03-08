@@ -9,35 +9,43 @@ Bhop Music Bot is a powerful Discord.js 14 music bot that allows users to play, 
 - Queue management and playlist support.
 - Robust error handling and user feedback.
 
-## Installation
+## Getting Started
 
-1. Clone the repository:
-```
-git clone https://github.com/akanora/bhop-music-bot.git
-```
+### Prerequisites
 
-2. Install the project dependencies:
-```
-npm install
-```
+To run the bot, you will need to have the following:
 
-3. Fill out the `config.js` file with your Discord bot token and other required information.
+- Node.js (v19.7.0 or later)
+- Discord.js (v14.7.1 or later)
 
-4. Publish slash commands and start the Bhop Music Bot:
-```
-npm run slash
-npm start
-```
+### Installation
+
+1. Clone this repository to your local machine.
+2. Run `npm install` to install all the required dependencies.
+3. Edit the `config.js` file to include your Discord bot token.
+4. Run `node slash.js` to publish the slash commands to Discord.
+5. Run `node index.js` to start the bot.
+
+### Usage
+
+Once the bot is running, you can use the following slash commands to control the music:
+
+- `/play <song name> | <playlist> | <link>`: Plays the specified song from YouTube.
+- `/pause`: Pauses the current song.
+- `/resume`: Resumes the current song.
+- `/queue`: Shows the first 10 songs in the queue with pagination.
+- `/history`: Shows the last 10 songs in the history with pagination.
+- `/skip`: Skips the current song.
+- `/previous`: Plays previous track.
+- `/exit`: Stops playing music and disconnects from the voice channel.
+- `/volume`: Changes the volume of the track and entire queue.
+- `/shuffle`: Shuffles the tracks in the queue.
+
 
 ## Contributing
-If you'd like to contribute to this project, please follow these steps:
 
-1. Fork this repository.
-2. Create a new branch `(git checkout -b feature/my-new-feature).`
-3. Commit your changes `(git commit -am 'Add some feature').`
-4. Push to the branch `(git push origin feature/my-new-feature).`
-5. Create a new Pull Request.
+If you find any issues or have suggestions for new features, feel free to create an issue or submit a pull request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
