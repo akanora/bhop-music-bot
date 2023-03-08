@@ -13,7 +13,7 @@ Bhop Music Bot is a powerful Discord.js 14 music bot that allows users to play, 
 
 1. Clone the repository:
 ```
-git clone https://github.com/your-username/bhop-music-bot.git
+git clone https://github.com/akanora/bhop-music-bot.git
 ```
 
 2. Install the project dependencies:
