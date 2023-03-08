@@ -30,11 +30,12 @@ To run the bot, you will need to have the following:
 
 Once the bot is running, you can use the following slash commands to control the music:
 
-- `/play <song name> | <playlist> | <link>`: Plays the specified song from YouTube.
+- `/play <song name> | <playlist> | <link>`: Plays the specified song from YouTube, Soundcloud, Spotify etc.
 - `/pause`: Pauses the current song.
 - `/resume`: Resumes the current song.
 - `/queue`: Shows the first 10 songs in the queue with pagination.
 - `/history`: Shows the last 10 songs in the history with pagination.
+- `/clear`: Clears the current queue and removes all enqueued tracks.
 - `/skip`: Skips the current song.
 - `/previous`: Plays previous track.
 - `/exit`: Stops playing music and disconnects from the voice channel.
