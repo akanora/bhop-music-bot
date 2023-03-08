@@ -1,22 +1,33 @@
 # Bhop Music Bot
 
-This bot is designed to allow users to play, pause, skip, and control the volume of music tracks in their Discord voice channels. It uses the latest version of Discord.js library to connect to the Discord API and provide a seamless music playback experience for users. The bot may have additional features such as support for multiple sources for music playback (e.g. YouTube, SoundCloud, Spotify, etc.), queue management, playlists, and more.
+Bhop Music Bot is a powerful Discord.js 14 music bot that allows users to play, pause, skip, and control the volume of music tracks in their Discord voice channels. It provides a seamless music playback experience for users by using the latest version of Discord.js library to connect to the Discord API.
+
+## Features
+
+- Play, pause, skip, and control volume of music tracks.
+- Support for multiple sources for music playback (e.g. YouTube, SoundCloud, Spotify, etc.).
+- Queue management and playlist support.
+- Robust error handling and user feedback.
 
 ## Installation
 
-To install the project dependencies, run:
-
+To install the project dependencies, run the following command in your terminal:
+```
 npm install
+```
 
 ## Usage
 
-To start the project, run:
-
+To start the Bhop Music Bot, run the following command:
+```
 npm start
+```
 
 To publish slash commands, run:
-
+```
 npm run slash
+```
+
 
 ## Contributing
 
