@@ -49,4 +49,4 @@ If you find any issues or have suggestions for new features, feel free to create
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE.md](LICENSE) file for details.
