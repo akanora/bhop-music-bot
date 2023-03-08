@@ -11,34 +11,33 @@ Bhop Music Bot is a powerful Discord.js 14 music bot that allows users to play, 
 
 ## Installation
 
-To install the project dependencies, run the following command in your terminal:
+1. Clone the repository:
+```
+git clone https://github.com/your-username/bhop-music-bot.git
+```
+
+2. Install the project dependencies:
 ```
 npm install
 ```
 
-## Usage
+3. Fill out the `config.js` file with your Discord bot token and other required information.
 
-To start the Bhop Music Bot, run the following command:
+4. Publish slash commands and start the Bhop Music Bot:
 ```
+npm run slash
 npm start
 ```
 
-To publish slash commands, run:
-```
-npm run slash
-```
-
-
 ## Contributing
-
 If you'd like to contribute to this project, please follow these steps:
 
 1. Fork this repository.
-2. Create a new branch (`git checkout -b feature/my-new-feature`).
-3. Commit your changes (`git commit -am 'Add some feature'`).
-4. Push to the branch (`git push origin feature/my-new-feature`).
+2. Create a new branch (git checkout -b feature/my-new-feature).
+3. Commit your changes (git commit -am 'Add some feature').
+4. Push to the branch (git push origin feature/my-new-feature).
 5. Create a new Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the LICENSE.md file for details.
