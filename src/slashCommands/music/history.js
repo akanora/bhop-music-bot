@@ -2,7 +2,7 @@ const { useHistory } = require('discord-player')
 const { EmbedBuilder } = require('discord.js')
 module.exports = {
   name: 'history',
-  description: 'Displays the history history in an embed',
+  description: 'Shows the last 10 songs in the history with pagination.',
   usage: '', //OPTIONAL (for the help cmd)
   examples: [], //OPTIONAL (for the help cmd)
   dir: 'music',

@@ -41,6 +41,7 @@ module.exports = {
             client: interaction.guild.members.me,
             requestedBy: interaction.user,
           },
+          skipOnNoStream: true,
           selfDeaf: true,
           volume: 100,
           leaveOnEmpty: true,

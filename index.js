@@ -1,7 +1,7 @@
-const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { Player } = require('discord-player');
+const { Client, Collection, GatewayIntentBits } = require('discord.js')
+const { Player } = require('discord-player')
 const client = new Client({
-  allowedMentions: { parse: ["users", "roles"] },
+  allowedMentions: { parse: ['users', 'roles'] },
   fetchAllMembers: true,
   intents: [
     GatewayIntentBits.Guilds,
@@ -11,38 +11,43 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.MessageContent,
   ],
-});
+})
 
 //SET COLLECTION
-client.commandes = new Collection();
-client.slash = new Collection();
-client.aliases = new Collection();
-cooldowns = new Collection();
+client.commandes = new Collection()
+client.slash = new Collection()
+client.aliases = new Collection()
+cooldowns = new Collection()
 
 //SET UTILS
-client.logger = require("./src/utils/logger");
-client.color = require("./src/utils/color.js");
+client.logger = require('./src/utils/logger')
+client.color = require('./src/utils/color.js')
 
 //SET CONFIG
-client.config = require("./config");
+client.config = require('./config')
 
 // LOAD THE 4 HANDLERS
-["error", "slashCommands", "event"].forEach((file) => {
-  require(`./src/utils/handlers/${file}`)(client);
-});
+;['error', 'slashCommands', 'event'].forEach((file) => {
+  require(`./src/utils/handlers/${file}`)(client)
+})
 
 // this is the entrypoint for discord-player based application
 client.player = new Player(client, {
   ytdlOptions: {
-      quality: "highestaudio",
-      smoothVolume: true,
-      highWaterMark: 1 << 25
-  }
+    quality: 'highestaudio',
+    smoothVolume: true,
+    highWaterMark: 1 << 25,
+  },
 })
 
 client.player.events.on('playerStart', (queue, track) => {
-  // we will later define queue.metadata object while creating the queue
-  queue.metadata.channel.send(`Started playing **${track.title}**!`);
-});
+  queue.metadata.channel.send(`Started playing **${track.title}**!`)
+})
 
-client.login(client.config.token);
+client.player.events.on('playerError', (queue, error, track) => {
+  return queue.metadata.channel.send(
+    `There was an error with **${track.title}**!`
+  )
+})
+
+client.login(client.config.token)
