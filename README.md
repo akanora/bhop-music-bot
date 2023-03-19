@@ -16,15 +16,14 @@ Bhop Music Bot is a powerful Discord.js 14 music bot that allows users to play, 
 To run the bot, you will need to have the following:
 
 - Node.js (v19.7.0 or later)
-- Discord.js (v14.7.1 or later)
+- Discord.js (v14.8.0 or later)
 
 ### Installation
 
 1. Clone this repository to your local machine.
 2. Run `npm install` to install all the required dependencies.
-3. Edit the `config.js` file to include your Discord bot token.
-4. Run `node slash.js` to publish the slash commands to Discord.
-5. Run `node index.js` to start the bot.
+3. Edit the `.env` file to include your Discord bot token.
+4. Run `node index.js` to publish the slash commands and start the bot.
 
 ### Usage
 
