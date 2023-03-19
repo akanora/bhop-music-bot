@@ -1,51 +1,92 @@
-# Bhop Music Bot
+<h1 align="center">
+   Discord.js v14 Command-Handlers
+</h1>
+<h4 align="center">Commands, Events, Permissions and Cooldown Handlers for Discord.js v14 bot ~ Made by Nathaniel</h4>
 
-Bhop Music Bot is a powerful Discord.js 14 music bot that allows users to play, pause, skip, and control the volume of music tracks in their Discord voice channels. It provides a seamless music playback experience for users by using the latest version of Discord.js library to connect to the Discord API.
+<p align="center">
+<a href="https://nodejs.org/en/download/">
+   <img src="https://img.shields.io/badge/node-16.9.x-brightgreen?style=for-the-badge" alt="node.js">
+</a>
 
-## Features
+<a href="https://github.com/discordjs/discord.js/">
+   <img src="https://img.shields.io/badge/discord.js-v14-blue?style=for-the-badge" alt="discord.js">
+</a>
 
-- Play, pause, skip, and control volume of music tracks.
-- Support for multiple sources for music playback (e.g. YouTube, SoundCloud, Spotify, etc.).
-- Queue management and playlist support.
-- Robust error handling and user feedback.
+<a href="https://github.com/Nathaniel-VFX/Discord.js-v14-Command-Handlers">
+   <img src="https://img.shields.io/badge/version-latest-red?style=for-the-badge" alt="node.js">
+</a>
 
-## Getting Started
-
-### Prerequisites
-
-To run the bot, you will need to have the following:
-
-- Node.js (v19.7.0 or later)
-- Discord.js (v14.8.0 or later)
-
-### Installation
-
-1. Clone this repository to your local machine.
-2. Run `npm install` to install all the required dependencies.
-3. Edit the `.env` file to include your Discord bot token.
-4. Run `node index.js` to publish the slash commands and start the bot.
-
-### Usage
-
-Once the bot is running, you can use the following slash commands to control the music:
-
-- `/play <song name> | <playlist> | <link>`: Plays the specified song from YouTube, Soundcloud, Spotify etc.
-- `/pause`: Pauses the current song.
-- `/queue`: Shows the first 10 songs in the queue with pagination.
-- `/history`: Shows the last 10 played songs with pagination.
-- `/nowplaying`: Displays the current track in an embed.
-- `/clear`: Clears the current queue and removes all enqueued tracks.
-- `/skip`: Skips the current song.
-- `/previous`: Plays previous track.
-- `/exit`: Stops playing music and disconnects from the voice channel.
-- `/volume`: Changes the volume of the track and entire queue.
-- `/shuffle`: Shuffles the tracks in the queue.
+</p>
 
 
-## Contributing
+<p align="center">
+   
+<a href="https://github.com/Nathaniel-VFX/Discord.js-v14-Command-Handlers/fork">
+   <img src="https://img.shields.io/badge/Fork-github-blueviolet?logo=githubactions&logoColor=white&style=for-the-badge" alt="github-fork">
+</a>
+   
+<a href="https://replit.com/@LeeNathaniel/Discordjs-v14-bot">
+   <img src="https://img.shields.io/badge/Fork-Replit-white?logo=githubactions&logoColor=white&style=for-the-badge" alt="replit-fork">
+</a>
+   
+</p>
+ 
+ 
+<p align="center">
 
-If you find any issues or have suggestions for new features, feel free to create an issue or submit a pull request.
+<a href="https://github.com/Nathaniel-VFX/Discord.js-v14-Command-Handlers">
+   <img src="https://img.shields.io/github/forks/Nathaniel-VFX/Discord.js-v14-Command-Handlers?logo=githubactions&logoColor=success&style=social" alt="github-fork">
+</a>
 
-## License
+<a href="https://github.com/Nathaniel-VFX/Discord.js-v14-Command-Handlers">
+   <img src="https://img.shields.io/github/stars/Nathaniel-VFX/Discord.js-v14-Command-Handlers?label=Stars&logo=ReverbNation&&logoColor=yellow&style=social" alt="github-repo-stars">
+</a>
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for details.
+<a href="https://github.com/Nathaniel-VFX">
+   <img src="https://img.shields.io/github/followers/Nathaniel-VFX?label=Follow&logo=github&style=social" alt="github-follow">
+</a>
+  
+</p>
+
+<br>
+
+
+# Features
+- Commands Handler (aliases, permissions)
+- Slash Commands Handler (options, choices, autocomplete, permissions)
+- Events Handler (messageCreate, interactionCreate, ready)
+- Button Handler (custom ID, permissions)
+- Permission Handler (commands, slash commands)
+- Cooldowns (No Database)
+
+## Preview
+<img src="https://i.imgur.com/8K2MgWQ.png"/>
+
+## Installation & Setup
+```
+npm install discord.js@latest @discordjs/rest ascii-table discord-api-types ms dotenv chalk@2.4.1
+```
+Leave the `GUILD_ID` in `.env` file blank if you want to register slash commands globally.
+
+<br />
+
+Add new secret: `TOKEN`, `CLIENT_ID` and `GUILD_ID` into the environment variables tab (lock icon in sidebar) if you are using [replit](https://replit.com/).
+
+If you are using [replit](https://replit.com/) you can remove `require('dotenv').config()` from `index.js` and you don't need to install `dotenv`
+
+---
+## Made by Nathaniel (Nathaniel VFX#8080)
+These command handlers are made by Nathaniel (Nathaniel VFX#8080)
+
+**⭐ Remember to star the repository if you like it! ⭐**
+
+_**Please give me proper credit when you use it, especially if you want to edit and post to public.**_
+
+---
+
+## Contact
+Discord: `Nathaniel VFX#8080`
+
+If you have any problem, feel free to contact me. 😉
+
+<img src="https://discord.c99.nl/widget/theme-2/753180650202202154.png" alt="Discord"/>
