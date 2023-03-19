@@ -8,12 +8,6 @@ client.on("ready", () => {
       name: `${client.guilds.cache.size} Servers`,
       type: ActivityType.Listening,
     },
-    {
-      name: `${client.channels.cache.size} Channels`,
-      type: ActivityType.Playing,
-    },
-    { name: `${client.users.cache.size} Users`, type: ActivityType.Watching },
-    { name: `Discord.js v14`, type: ActivityType.Competing },
   ];
   const status = ["online", "dnd", "idle"];
   let i = 0;
@@ -21,7 +15,7 @@ client.on("ready", () => {
     if (i >= activities.length) i = 0;
     client.user.setActivity(activities[i]);
     i++;
-  }, 5000);
+  }, 60000);
 
   let s = 0;
   setInterval(() => {
