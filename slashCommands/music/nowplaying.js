@@ -13,7 +13,7 @@ module.exports = {
 
     if (!queue)
       return interaction.reply({
-        content: `I am **not** in a voice channel`,
+        content: `I am **not** in a voice channelll`,
         ephemeral: true,
       });
     if (!queue.currentTrack)

@@ -83,7 +83,6 @@ module.exports = {
 
     let currentIndex = 0;
     const collector = message.createMessageComponentCollector({
-      filter: (i) => i.user.id === interaction.user.id,
       idle: 60000,
     });
 
