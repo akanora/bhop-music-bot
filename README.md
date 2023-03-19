@@ -14,7 +14,7 @@ TOKEN=your_bot_token_here
 
 Use the `!play` command to play music in your voice channel. You can provide a query or a link to a YouTube video or playlist.
 ```
-!play <query_or_youtube_link>
+!play <query>
 ```
 
 Use the `!skip` command to skip the currently playing song.
