@@ -32,7 +32,6 @@ Once the bot is running, you can use the following slash commands to control the
 
 - `/play <song name> | <playlist> | <link>`: Plays the specified song from YouTube, Soundcloud, Spotify etc.
 - `/pause`: Pauses the current song.
-- `/resume`: Resumes the current song.
 - `/queue`: Shows the first 10 songs in the queue with pagination.
 - `/history`: Shows the last 10 songs in the history with pagination.
 - `/clear`: Clears the current queue and removes all enqueued tracks.
