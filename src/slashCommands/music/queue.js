@@ -1,4 +1,9 @@
-const { EmbedBuilder } = require('discord.js')
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require('discord.js')
 const { useQueue } = require('discord-player')
 
 module.exports = {
@@ -14,73 +19,110 @@ module.exports = {
     const queue = useQueue(interaction.guildId)
 
     if (!queue)
-      return interaction.reply('I am not in a voice channel', {
-        ephemeral: false,
+      return interaction.reply({
+        content: `I am **not** in a voice channel`,
+        ephemeral: true,
       })
-    if (!queue.tracks || !queue.currentTrack)
-      return interaction.reply('There is no queue', { ephemeral: false })
 
-    const tracks = queue.tracks
-      .toArray()
-      .map((track, idx) => `**${++idx})** [${track.title}](${track.url})`)
+    const formatTracks = queue.tracks.toArray()
 
-    const embeds = []
+    if (formatTracks.length === 0) {
+      return interaction.reply({
+        content: `There is **no** queue to **display**`,
+        ephemeral: true,
+      })
+    }
+
+    const tracks = formatTracks.map(
+      (track, idx) => `**${idx + 1})** [${track.title}](${track.url})`
+    )
+
     const chunkSize = 10
-    let index = 0
-    while (tracks.length > 0) {
-      const chunk = tracks.slice(0, chunkSize)
+    const pages = Math.ceil(tracks.length / chunkSize)
+
+    const embeds = Array.from({ length: pages }, (_, index) => {
+      const start = index * chunkSize
+      const end = start + chunkSize
+
       const embed = new EmbedBuilder()
         .setColor('Red')
         .setTitle('Tracks Queue')
-        .setDescription(chunk.join('\n') || '**No more queued songs**')
+        .setDescription(
+          tracks.slice(start, end).join('\n') || '**No queued songs**'
+        )
         .setFooter({
           text: `Page ${index + 1} | Total ${queue.tracks.size} tracks`,
         })
 
-      embeds.push(embed)
-      tracks.splice(0, chunkSize)
-      index++
+      return embed
+    })
+
+    if (embeds.length === 1) {
+      return interaction.reply({
+        embeds: [embeds[0]],
+      })
     }
+
+    const prevButton = new ButtonBuilder()
+      .setCustomId('prev')
+      .setLabel('Previous')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('⬅️')
+
+    const nextButton = new ButtonBuilder()
+      .setCustomId('next')
+      .setLabel('Next')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('➡️')
+
+    const row = new ActionRowBuilder().addComponents(prevButton, nextButton)
 
     const message = await interaction.reply({
       embeds: [embeds[0]],
+      components: [row],
       fetchReply: true,
     })
 
-    if (embeds.length === 1) return
-
-    message.react('⬅️')
-    message.react('➡️')
-
-    const collector = message.createReactionCollector({
-      filter: (reaction, user) =>
-        ['⬅️', '➡️'].includes(reaction.emoji.name) &&
-        user.id === interaction.user.id,
-      time: 60000,
+    let currentIndex = 0
+    const collector = message.createMessageComponentCollector({
+      filter: (i) => i.user.id === interaction.user.id,
+      idle: 60000,
     })
 
-    let currentIndex = 0
-    collector.on('collect', (reaction, user) => {
-      switch (reaction.emoji.name) {
-        case '⬅️':
-          if (currentIndex === 0) return
-          currentIndex--
+    collector.on('collect', (i) => {
+      i.deferUpdate()
+
+      switch (i.customId) {
+        case 'prev': {
+          if (currentIndex === 0) {
+            currentIndex = embeds.length - 1
+          } else {
+            currentIndex--
+          }
           break
-        case '➡️':
-          if (currentIndex === embeds.length - 1) return
-          currentIndex++
+        }
+        case 'next': {
+          if (currentIndex === embeds.length - 1) {
+            currentIndex = 0
+          } else {
+            currentIndex++
+          }
           break
+        }
         default:
           break
       }
 
-      reaction.users.remove(user.id).catch(() => {})
-
-      message.edit({ embeds: [embeds[currentIndex]] })
+      message.edit({
+        embeds: [embeds[currentIndex]],
+        components: [row],
+      })
     })
 
     collector.on('end', () => {
-      message.reactions.removeAll().catch(() => {})
+      message.edit({
+        components: [],
+      })
     })
   },
 }

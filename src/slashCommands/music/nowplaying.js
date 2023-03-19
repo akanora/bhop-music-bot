@@ -13,9 +13,16 @@ module.exports = {
   run: async (client, interaction) => {
     const queue = useQueue(interaction.guild.id)
 
-    if (!queue) return interaction.reply(`I am not in a voice channel`)
+    if (!queue)
+      return interaction.reply({
+        content: `I am **not** in a voice channel`,
+        ephemeral: true,
+      })
     if (!queue.currentTrack)
-      return interaction.reply(`There is no track **currently** playing`)
+      return interaction.reply({
+        content: `There is no track **currently** playing`,
+        ephemeral: true,
+      })
 
     await interaction.deferReply()
     const track = queue.currentTrack

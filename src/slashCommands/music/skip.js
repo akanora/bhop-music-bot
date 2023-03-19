@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js')
-const { usePlayer } = require('discord-player')
+const { useQueue } = require('discord-player')
 
 module.exports = {
   name: 'skip',
@@ -11,24 +11,22 @@ module.exports = {
   permissions: [], // OPTIONAL
 
   run: async (client, interaction) => {
-    const player = usePlayer(interaction.guildId)
+    const queue = useQueue(interaction.guildId)
 
-    if (!player) return interaction.reply('I am not in a voice channel')
-    if (!player.queue.currentTrack)
-      return interaction.reply('There is no track **currently** playing')
+    if (!queue)
+      return interaction.reply({
+        content: `I am **not** in a voice channel`,
+        ephemeral: true,
+      })
+    if (!queue.currentTrack)
+      return interaction.reply({
+        content: `There is no track **currently** playing`,
+        ephemeral: true,
+      })
 
-    const currentSong = player.queue.currentTrack
-
-    // Skip the current song
-    player.queue.node.skip()
-
-    // Return an embed to the user saying the song has been skipped
-    await interaction.reply({
-      embeds: [
-        new EmbedBuilder()
-          .setDescription(`${currentSong.title} has been skipped!`)
-          .setThumbnail(currentSong.thumbnail),
-      ],
+    queue.node.skip()
+    return interaction.reply({
+      content: `⏩ | I have **skipped** to the next track`,
     })
   },
 }

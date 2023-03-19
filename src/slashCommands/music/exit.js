@@ -1,4 +1,4 @@
-const { usePlayer } = require('discord-player')
+const { useQueue } = require('discord-player')
 
 module.exports = {
   name: 'exit',
@@ -11,15 +11,17 @@ module.exports = {
   permissions: [], // OPTIONAL
 
   run: async (client, interaction) => {
-    const player = usePlayer(interaction.guildId)
+    const queue = useQueue(interaction.guildId)
 
-    if (!player) return interaction.reply('I am not in a voice channel')
-    if (!player.queue.currentTrack)
-      return interaction.reply('There is no track **currently** playing')
+    if (!queue)
+      return interaction.reply({
+        content: `I am **not** in a voice channel`,
+        ephemeral: true,
+      })
 
-    // Deletes all the songs from the queue and exits the channel
-    player.queue.delete()
-
-    await interaction.reply('Why you do this to me?')
+    queue.delete()
+    return interaction.reply({
+      content: `I have **successfully disconnected** from the voice channel`,
+    })
   },
 }

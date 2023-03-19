@@ -12,11 +12,20 @@ module.exports = {
   run: async (client, interaction) => {
     const queue = useQueue(interaction.guild.id)
 
-    if (!queue) return interaction.reply(`I am not in a voice channel`)
-    if (!queue.tracks) return interaction.reply(`There is nothing to clear`)
+    if (!queue)
+      return interaction.reply({
+        content: `I am **not** in a voice channel`,
+        ephemeral: true,
+      })
+    if (queue.tracks.size === 0)
+      return interaction.reply({
+        content: `There is **nothing** to clear`,
+        ephemeral: true,
+      })
 
     queue.tracks.clear()
-    queue.history.clear()
-    return interaction.reply(`I have **cleared** the queue`)
+    return interaction.reply({
+      content: `I have **cleared** the queue`,
+    })
   },
 }

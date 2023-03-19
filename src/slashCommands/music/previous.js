@@ -1,4 +1,4 @@
-const { useHistory } = require('discord-player')
+const { useHistory, useQueue } = require('discord-player')
 
 module.exports = {
   name: 'previous',
@@ -11,25 +11,23 @@ module.exports = {
 
   run: async (client, interaction) => {
     const history = useHistory(interaction.guild.id)
+    const queue = useQueue(interaction.guild.id)
 
-    if (!history)
+    if (!queue)
       return interaction.reply({
-        content: `I am not in a voice channel`,
+        content: `I am **not** in a voice channel`,
         ephemeral: true,
       })
 
     if (!history.previousTrack)
       return interaction.reply({
-        content: 'No previous track in history!',
+        content: `There is **no** previous track in the **history**`,
         ephemeral: true,
       })
 
-    await interaction.deferReply()
-
     await history.previous()
-
-    return interaction.followUp({
-      content: `⏯ | I have skipped to the previous track`,
+    return interaction.reply({
+      content: `🔁 | I am **replaying** the previous track`,
     })
   },
 }

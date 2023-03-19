@@ -1,4 +1,4 @@
-const { usePlayer } = require('discord-player')
+const { useQueue, useTimeline } = require('discord-player')
 
 module.exports = {
   name: 'volume',
@@ -19,17 +19,24 @@ module.exports = {
     },
   ],
   run: async (client, interaction) => {
-    const player = usePlayer(interaction.guildId)
+    const timeline = useTimeline(interaction.guildId)
+    const queue = useQueue(interaction.guildId)
     const volume = interaction.options.getInteger('volume')
 
-    if (!player) return interaction.reply('I am not in a voice channel')
-    if (!player.queue.currentTrack)
-      return interaction.reply('There is no track **currently** playing')
+    if (!queue)
+      return interaction.reply({
+        content: `I am not in a voice channel`,
+        ephemeral: true,
+      })
+    if (!queue.currentTrack)
+      return interaction.reply({
+        content: `There is no track **currently** playing`,
+        ephemeral: true,
+      })
 
-    await interaction.deferReply()
-    player.setVolume(volume)
-    return interaction.followUp({
-      content: `I **changed** the volume to: **${player.volume}%**`,
+    timeline.setVolume(volume)
+    return interaction.reply({
+      content: `I **changed** the volume to: **${timeline.volume}%**`,
     })
   },
 }

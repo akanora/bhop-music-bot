@@ -1,92 +1,126 @@
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require('discord.js')
 const { useHistory } = require('discord-player')
-const { EmbedBuilder } = require('discord.js')
+
 module.exports = {
   name: 'history',
-  description: 'Shows the last 10 songs in the history with pagination.',
-  usage: '', //OPTIONAL (for the help cmd)
-  examples: [], //OPTIONAL (for the help cmd)
+  description: 'Shows the last 10 played songs with pagination.',
+  usage: '',
+  examples: [],
   dir: 'music',
-  cooldown: 1, // Cooldown in seconds, by default it's 2 seconds | OPTIONAL
-  permissions: [], // OPTIONAL
+  cooldown: 1,
+  permissions: [],
 
-  run: async (client, interaction) => {
-    const history = useHistory(interaction.guild.id)
-    if (!history) return interaction.reply(`I am not in a voice channel`)
-    if (!history.tracks || !history.currentTrack)
-      return interaction.reply(`There is no tracks history`)
+  async run(client, interaction) {
+    const history = useHistory(interaction.guildId)
 
-    const tracksPerPage = 5
-    const tracks = history.tracks
-      .toArray()
-      .map((track, idx) => `**${++idx})** [${track.title}](${track.url})`)
-    const pagesNum = Math.ceil(tracks.length / tracksPerPage)
-
-    if (pagesNum <= 0) return interaction.reply(`There is no tracks history`)
-
-    let currentPage = 0
-
-    const embed = new EmbedBuilder()
-      .setColor('Red')
-      .setTitle('Tracks Queue History')
-      .setDescription(tracks.slice(0, tracksPerPage).join('\n'))
-      .setFooter({
-        text: `Page ${currentPage + 1} of ${pagesNum} | Total ${
-          history.tracks.size
-        } tracks`,
+    if (!history)
+      return interaction.reply({
+        content: `I have **not** played any songs yet.`,
+        ephemeral: true,
       })
 
+    const formatTracks = history.tracks.toArray()
+
+    if (formatTracks.length === 0) {
+      return interaction.reply({
+        content: `There is **no** history to **display**`,
+        ephemeral: true,
+      })
+    }
+
+    const tracks = formatTracks.map(
+      (track, idx) => `**${idx + 1})** [${track.title}](${track.url})`
+    )
+
+    const chunkSize = 10
+    const pages = Math.ceil(tracks.length / chunkSize)
+
+    const embeds = Array.from({ length: pages }, (_, index) => {
+      const start = index * chunkSize
+      const end = start + chunkSize
+
+      const embed = new EmbedBuilder()
+        .setColor('Red')
+        .setTitle('History')
+        .setDescription(tracks.slice(start, end).join('\n') || '**No history**')
+        .setFooter({
+          text: `Page ${index + 1} | Total ${history.tracks.size} tracks`,
+        })
+
+      return embed
+    })
+
+    if (embeds.length === 1) {
+      return interaction.reply({
+        embeds: [embeds[0]],
+      })
+    }
+
+    const prevButton = new ButtonBuilder()
+      .setCustomId('prev')
+      .setLabel('Previous')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('⬅️')
+
+    const nextButton = new ButtonBuilder()
+      .setCustomId('next')
+      .setLabel('Next')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('➡️')
+
+    const row = new ActionRowBuilder().addComponents(prevButton, nextButton)
+
     const message = await interaction.reply({
-      embeds: [embed],
+      embeds: [embeds[0]],
+      components: [row],
       fetchReply: true,
     })
 
-    if (pagesNum > 1) {
-      await message.react('⬅️')
-      await message.react('➡️')
+    let currentIndex = 0
+    const collector = message.createMessageComponentCollector({
+      filter: (i) => i.user.id === interaction.user.id,
+      idle: 60000,
+    })
 
-      const collector = message.createReactionCollector({
-        filter: (reaction, user) =>
-          ['⬅️', '➡️'].includes(reaction.emoji.name) &&
-          user.id === interaction.user.id,
-        time: 60000,
-      })
+    collector.on('collect', (i) => {
+      i.deferUpdate()
 
-      collector.on('collect', async (reaction) => {
-        if (reaction.emoji.name === '⬅️') {
-          if (currentPage > 0) {
-            currentPage--
-            await reaction.users.remove(interaction.user.id).catch(() => {})
+      switch (i.customId) {
+        case 'prev': {
+          if (currentIndex === 0) {
+            currentIndex = embeds.length - 1
+          } else {
+            currentIndex--
           }
-        } else if (reaction.emoji.name === '➡️') {
-          if (currentPage < pagesNum - 1) {
-            currentPage++
-            await reaction.users.remove(interaction.user.id).catch(() => {})
-          }
+          break
         }
+        case 'next': {
+          if (currentIndex === embeds.length - 1) {
+            currentIndex = 0
+          } else {
+            currentIndex++
+          }
+          break
+        }
+        default:
+          break
+      }
 
-        const newEmbed = new EmbedBuilder()
-          .setColor('Red')
-          .setTitle('Tracks Queue History')
-          .setFooter({
-            text: `Page ${currentPage + 1} of ${pagesNum} | Total ${
-              history.tracks.size
-            } tracks`,
-          })
-          .setDescription(
-            tracks
-              .slice(
-                currentPage * tracksPerPage,
-                (currentPage + 1) * tracksPerPage
-              )
-              .join('\n')
-          )
-
-        await message.edit({ embeds: [newEmbed] })
+      message.edit({
+        embeds: [embeds[currentIndex]],
+        components: [row],
       })
+    })
 
-      collector.on('end', () => {
-        message.reactions.removeAll().catch(() => {})
+    collector.on('end', () => {
+      message.edit({
+        components: [],
       })
-    }
+    })
   },
 }
