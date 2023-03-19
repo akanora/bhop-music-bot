@@ -50,4 +50,28 @@ client.player.events.on('playerError', (queue, error, track) => {
   )
 })
 
+client.player.events.on('disconnect', (queue) => {
+  queue.metadata.channel.send(
+    'I have been **manually disconnected** from the **voice channel**'
+  )
+})
+
+client.player.events.on('connectionError', (queue, error) => {
+  console.log(
+    `[${queue.guild.name}] Error emitted from the connection: ${error.message}`
+  )
+})
+
+client.player.events.on('emptyChannel', (queue, error) => {
+  queue.metadata.channel.send(
+    'I left the channel after **5 minutes** due to **channel inactivity**'
+  )
+})
+
+client.player.events.on('error', (queue, error) => {
+  console.log(
+    `[${queue.guild.name}] Error emitted from the queue: ${error.message}`
+  )
+})
+
 client.login(client.config.token)
