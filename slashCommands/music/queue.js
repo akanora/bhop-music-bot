@@ -1,4 +1,4 @@
-const { usePlayer } = require("discord-player");
+const { useQueue } = require("discord-player");
 const {
   ApplicationCommandType,
   EmbedBuilder,
