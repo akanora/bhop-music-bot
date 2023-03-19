@@ -40,8 +40,8 @@ client.slashCommands = new Collection();
 
 module.exports = client;
 
-fs.readdirSync("./handlers").forEach((handler) => {
+for (const handler of fs.readdirSync("./handlers")) {
   require(`./handlers/${handler}`)(client);
-});
+}
 
 client.login(process.env.TOKEN);
