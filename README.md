@@ -34,6 +34,7 @@ Once the bot is running, you can use the following slash commands to control the
 - `/pause`: Pauses the current song.
 - `/queue`: Shows the first 10 songs in the queue with pagination.
 - `/history`: Shows the last 10 played songs with pagination.
+- `/nowplaying`: Displays the current track in an embed.
 - `/clear`: Clears the current queue and removes all enqueued tracks.
 - `/skip`: Skips the current song.
 - `/previous`: Plays previous track.
