@@ -1,4 +1,3 @@
-const { EmbedBuilder } = require('discord.js')
 const { useQueue } = require('discord-player')
 
 module.exports = {
