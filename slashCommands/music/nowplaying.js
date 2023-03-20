@@ -13,7 +13,7 @@ module.exports = {
 
     if (!queue)
       return interaction.reply({
-        content: `I am **not** in a voice channelll`,
+        content: `I am **not** in a voice channel`,
         ephemeral: true,
       });
     if (!queue.currentTrack)
@@ -29,10 +29,11 @@ module.exports = {
         name: interaction.user.username,
         iconURL: interaction.user.displayAvatarURL(),
       })
-      .setColor("Red")
-      .setTitle("💿 Now Playing")
-      .setDescription(`[${track.title}](${track.url})`)
-      .setThumbnail(track.thumbnail ?? interaction.user.displayAvatarURL())
+      .setColor("#00ff00")
+      .setDescription(
+        `Now playing: ${queue.currentTrack.title} \nRequested by: ${queue.currentTrack.requestedBy}`
+      )
+      .setThumbnail(queue.currentTrack.thumbnail)
       .addFields([
         { name: "Author", value: track.author },
         {
