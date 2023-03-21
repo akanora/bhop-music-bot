@@ -4,6 +4,8 @@ const {
   ApplicationCommandOptionType,
 } = require("discord.js");
 
+const player = useMasterPlayer();
+
 module.exports = {
   name: "play",
   description: "Plays and enqueues track(s) of the query provided.",
@@ -20,35 +22,29 @@ module.exports = {
   ],
 
   async autocomplete(interaction) {
-    const player = useMasterPlayer();
     const query = interaction.options.getString("query");
     const result = await player.search(query);
 
-    let returnData = [];
-    if (result.playlist) {
-      returnData.push({
-        name: result.playlist.title + " | Playlist",
-        value: query,
-      });
-    }
-    result.tracks
-      .slice(0, 10)
-      .map((track) => returnData.push({ name: track.title, value: track.url }));
-    await interaction.respond(returnData);
+    const tracks = result.tracks.slice(0, 10).map((t) => ({
+      name: t.title,
+      value: t.url,
+    }));
+
+    return interaction.respond(tracks);
   },
 
   async run(client, interaction) {
     if (!interaction.isCommand()) return;
-    const player = useMasterPlayer();
     await interaction.deferReply();
+
     const query = interaction.options.getString("query", true);
+
     try {
       if (!interaction.member.voice.channel) {
-        await interaction.followUp({
+        return interaction.followUp({
           content: "You are not in a voice channel!",
           ephemeral: true,
         });
-        return;
       }
 
       const searchResult = await player.search(query, {
@@ -71,7 +67,7 @@ module.exports = {
             },
             skipOnNoStream: true,
             selfDeaf: true,
-            volume: 100,
+            volume: 80,
             leaveOnEmpty: true,
             leaveOnEmptyCooldown: 300000,
             leaveOnEnd: true,
@@ -80,17 +76,16 @@ module.exports = {
         }
       );
 
-      return interaction.editReply({
-        content: `Successfully enqueued${
-          res.track.playlist
-            ? ` **track(s)** from: **${res.track.playlist.title}**`
-            : `: **${res.track.title}**`
-        }`,
-      });
+      const message = res.track.playlist
+        ? `Successfully enqueued **track(s)** from: **${res.track.playlist.title}**`
+        : `Successfully enqueued: **${res.track.title}**`;
+
+      return interaction.editReply({ content: message });
     } catch (error) {
-      console.log(error);
-      await interaction.followUp({
-        content: "An **error** has occurred",
+      console.error(error);
+
+      return interaction.followUp({
+        content: "An error occurred while trying to play the track",
         ephemeral: true,
       });
     }
