@@ -24,17 +24,19 @@ module.exports = {
 
     const track = queue.currentTrack;
 
+    const requestedByString = track.requestedBy.username
+      ? `${track.requestedBy.username}#${track.requestedBy.discriminator}`
+      : "Someone";
+
     const embed = new EmbedBuilder()
       .setAuthor({
         name: interaction.user.username,
         iconURL: interaction.user.displayAvatarURL(),
       })
       .setColor("#00ff00")
-      .setDescription(
-        `Now playing: ${queue.currentTrack.title} \nRequested by: ${queue.currentTrack.requestedBy}`
-      )
-      .setThumbnail(queue.currentTrack.thumbnail)
+      .setThumbnail(track.thumbnail)
       .addFields([
+        { name: "Now playing", value: track.title },
         { name: "Author", value: track.author },
         {
           name: "Progress",
@@ -43,11 +45,7 @@ module.exports = {
           }%)`,
         },
       ])
-      .setFooter({
-        text: `Ping: ${
-          queue.ping
-        }ms | Event Loop Lag: ${queue.player.eventLoopLag.toFixed(0)}ms`,
-      });
+      .setFooter({ text: `Song requested by ${requestedByString}` });
 
     return interaction.reply({ embeds: [embed] });
   },
