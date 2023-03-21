@@ -26,7 +26,7 @@ module.exports = {
     const result = await player.search(query);
 
     const tracks = result.tracks.slice(0, 10).map((t) => ({
-      name: t.title,
+      name: t.author + " - " + t.title,
       value: t.url,
     }));
 
@@ -78,7 +78,7 @@ module.exports = {
 
       const message = res.track.playlist
         ? `Successfully enqueued **track(s)** from: **${res.track.playlist.title}**`
-        : `Successfully enqueued: **${res.track.title}**`;
+        : `Successfully enqueued: **${res.track.author} - ${res.track.title}**`;
 
       return interaction.editReply({ content: message });
     } catch (error) {
