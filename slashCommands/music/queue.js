@@ -38,8 +38,9 @@ module.exports = {
     const chunkSize = 10;
     const pages = Math.ceil(tracks.length / chunkSize);
 
-    const embeds = Array.from({ length: pages }, (_, index) => {
-      const start = index * chunkSize;
+    const embeds = [];
+    for (let i = 0; i < pages; i++) {
+      const start = i * chunkSize;
       const end = start + chunkSize;
 
       const embed = new EmbedBuilder()
@@ -49,11 +50,11 @@ module.exports = {
           tracks.slice(start, end).join("\n") || "**No queued songs**"
         )
         .setFooter({
-          text: `Page ${index + 1} | Total ${queue.tracks.size} tracks`,
+          text: `Page ${i + 1} | Total ${queue.tracks.size} tracks`,
         });
 
-      return embed;
-    });
+      embeds.push(embed);
+    }
 
     if (embeds.length === 1) {
       return interaction.reply({
@@ -90,22 +91,14 @@ module.exports = {
       i.deferUpdate();
 
       switch (i.customId) {
-        case "prev": {
-          if (currentIndex === 0) {
-            currentIndex = embeds.length - 1;
-          } else {
-            currentIndex--;
-          }
+        case "prev":
+          currentIndex =
+            currentIndex === 0 ? embeds.length - 1 : currentIndex - 1;
           break;
-        }
-        case "next": {
-          if (currentIndex === embeds.length - 1) {
-            currentIndex = 0;
-          } else {
-            currentIndex++;
-          }
+        case "next":
+          currentIndex =
+            currentIndex === embeds.length - 1 ? 0 : currentIndex + 1;
           break;
-        }
         default:
           break;
       }
