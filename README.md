@@ -12,6 +12,10 @@ BHop Music Bot is a Discord bot that can play music in your voice channels. It i
   ownerIds: ['yourdiscordid'],
 4. Run the bot: `node bot.js`
 
+OPTIONAL FOR LINUX! DON'T DO THIS FOR WINDOWS
+
+5. npm i node-fetch@2.6.1
+
 ## Usage
 
 Use the `/play` command to play music in your voice channel. You can provide a query or a link to a YouTube video or playlist.
