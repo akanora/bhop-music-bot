@@ -6,32 +6,34 @@ BHop Music Bot is a Discord bot that can play music in your voice channels. It i
 
 1. Clone the repository: `git clone https://github.com/akanora/bhop-music-bot.git`
 2. Install dependencies: `npm install` & `sudo apt install ffmpeg`
-3. Create a `.env` file in the root directory with the following values:
-TOKEN=your_bot_token_here
-4. Run the bot: `node index.js`
+3. Edit Src/Credentials/Config.js with the following values:
+  prefix: ['yourprefix'],
+  botToken: 'yourtoken',
+  ownerIds: ['yourdiscordid'],
+4. Run the bot: `node bot.js`
 
 ## Usage
 
-Use the `!play` command to play music in your voice channel. You can provide a query or a link to a YouTube video or playlist.
+Use the `/play` command to play music in your voice channel. You can provide a query or a link to a YouTube video or playlist.
 ```
-!play <query>
+/play <query>
 ```
 
-Use the `!skip` command to skip the currently playing song.
+Use the `/skip` command to skip the currently playing song.
 ```
-!skip
+/skip
 ```
-Use the `!queue` command to view the current song queue.
+Use the `/queue` command to view the current song queue.
 ```
-!queue
+/queue
 ```
-Use the `!clear` command to clear the song queue.
+Use the `/clear` command to clear the song queue.
 ```
-!clear
+/clear
 ```
-Use the `!exit` command to make the bot leave the voice channel.
+Use the `/exit` command to make the bot leave the voice channel.
 ```
-!exit
+/exit
 ```
 ## Contributing
 
