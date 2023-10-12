@@ -20,11 +20,11 @@ module.exports = {
       return interaction.reply(`There is no command with name \`${commandName}\`!`);
     }
 
-    delete require.cache[require.resolve(`${__dirname}\\${command.name}.js`)];
+    delete require.cache[require.resolve(`${__dirname}/${command.name}.js`)];
 
     try {
       client.slashCommands.delete(command.name);
-      const newCommand = require(`${__dirname}\\${command.name}.js`);
+      const newCommand = require(`${__dirname}/${command.name}.js`);
       client.slashCommands.set(newCommand.name, newCommand);
       await interaction.reply(`Command \`${newCommand.name}\` was reloaded!`);
     } catch (error) {
