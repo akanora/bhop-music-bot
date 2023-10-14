@@ -31,9 +31,9 @@ Use the `/clear` command to clear the song queue.
 ```
 /clear
 ```
-Use the `/exit` command to make the bot leave the voice channel.
+Use the `/stop` command to make the bot leave the voice channel.
 ```
-/exit
+/stop
 ```
 ## Contributing
 
