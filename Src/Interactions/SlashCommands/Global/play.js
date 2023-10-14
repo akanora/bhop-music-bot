@@ -20,14 +20,17 @@ module.exports = {
     const query = interaction.options.getString('query');
     let returnData = [];
     if (query) {
-      let result = await player.search(query);
+      const result = await player.search(query);
       if (result.playlist) {
-        if (result.playlist.title.length > 100) {
-          result.playlist.title = result.playlist.title.substring(0, 90) + '..(truncated)..';
-        }
-        returnData.push({ name: result.playlist.title + ' | Playlist', value: query });
+        const title =
+          result.playlist.title.length > 100
+            ? result.playlist.title.substring(0, 90) + '..(truncated)..'
+            : result.playlist.title;
+        returnData.push({ name: `${title} | Playlist`, value: query });
       }
-      result.tracks.slice(0, 6).map(track => returnData.push({ name: track.title, value: track.url }));
+      for (const track of result.tracks.slice(0, 6)) {
+        returnData.push({ name: track.title, value: track.url });
+      }
     }
     await interaction.respond(returnData);
   },
@@ -37,17 +40,17 @@ module.exports = {
     const query = interaction.options.getString('query', true);
 
     try {
-      if (!interaction.member.voice.channel) {
+      const memberVoiceChannel = interaction.member.voice.channel;
+      const botVoiceChannel = interaction.guild.members.me.voice.channel;
+
+      if (!memberVoiceChannel) {
         return interaction.followUp({
           content: 'You are not in a voice channel!',
           ephemeral: true,
         });
       }
 
-      if (
-        interaction.guild.members.me.voice.channelId &&
-        interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
-      ) {
+      if (botVoiceChannel && memberVoiceChannel.id !== botVoiceChannel.id) {
         await interaction.followUp({
           content: 'You are not in my voice channel!',
           ephemeral: true,
@@ -61,7 +64,7 @@ module.exports = {
         return interaction.followUp(`We found no tracks for ${query}!`);
       }
 
-      const res = await player.play(interaction.member.voice.channel.id, searchResult, {
+      const res = await player.play(memberVoiceChannel.id, searchResult, {
         nodeOptions: {
           metadata: {
             channel: interaction.channel,
