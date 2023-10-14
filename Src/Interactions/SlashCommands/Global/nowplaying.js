@@ -10,19 +10,14 @@ module.exports = {
     const queue = useQueue(interaction.guildId);
     const timeline = useTimeline(interaction.guildId);
 
-    if (!queue)
+    if (!queue) {
       return interaction.reply({
-        content: `I am **not** in a voice channel`,
+        content: queue ? `There is no track **currently** playing` : `I am **not** in a voice channel`,
         ephemeral: true,
       });
-    if (!queue.currentTrack)
-      return interaction.reply({
-        content: `There is no track **currently** playing`,
-        ephemeral: true,
-      });
+    }
 
     const track = queue.currentTrack;
-
     const requestedByString = track.requestedBy.username
       ? `${track.requestedBy.username}#${track.requestedBy.discriminator}`
       : 'Someone';
