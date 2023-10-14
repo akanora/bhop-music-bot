@@ -29,25 +29,21 @@ module.exports = {
     const chunkSize = 10;
     const pages = Math.ceil(tracks.length / chunkSize);
 
-    const embeds = [];
-    for (let i = 0; i < pages; i++) {
-      const start = i * chunkSize;
-      const end = start + chunkSize;
+    let currentPage = 0;
 
-      const embed = new EmbedBuilder()
-        .setColor('Red')
-        .setTitle('History')
-        .setDescription(tracks.slice(start, end).join('\n') || '**No history**')
-        .setFooter({
-          text: `Page ${i + 1} | Total ${history.tracks.size} tracks`,
-        });
+    const embed = new EmbedBuilder()
+      .setColor('Red')
+      .setTitle('Tracks History')
+      .setDescription(
+        tracks.slice(currentPage * chunkSize, (currentPage + 1) * chunkSize).join('\n') || '**No queued songs**',
+      )
+      .setFooter({
+        text: `Page ${currentPage + 1} | Total ${history.tracks.size} tracks`,
+      });
 
-      embeds.push(embed);
-    }
-
-    if (embeds.length === 1) {
+    if (pages === 1) {
       return interaction.reply({
-        embeds: [embeds[0]],
+        embeds: [embed],
       });
     }
 
@@ -66,12 +62,11 @@ module.exports = {
     const row = new ActionRowBuilder().addComponents(prevButton, nextButton);
 
     const message = await interaction.reply({
-      embeds: [embeds[0]],
+      embeds: [embed],
       components: [row],
       fetchReply: true,
     });
 
-    let currentIndex = 0;
     const collector = message.createMessageComponentCollector({
       idle: 60000,
     });
@@ -81,17 +76,25 @@ module.exports = {
 
       switch (i.customId) {
         case 'prev':
-          currentIndex = currentIndex === 0 ? embeds.length - 1 : currentIndex - 1;
+          currentPage = currentPage === 0 ? pages - 1 : currentPage - 1;
           break;
         case 'next':
-          currentIndex = currentIndex === embeds.length - 1 ? 0 : currentIndex + 1;
+          currentPage = currentPage === pages - 1 ? 0 : currentPage + 1;
           break;
         default:
           break;
       }
 
+      embed
+        .setDescription(
+          tracks.slice(currentPage * chunkSize, (currentPage + 1) * chunkSize).join('\n') || '**No queued songs**',
+        )
+        .setFooter({
+          text: `Page ${currentPage + 1} | Total ${history.tracks.size} tracks`,
+        });
+
       message.edit({
-        embeds: [embeds[currentIndex]],
+        embeds: [embed],
         components: [row],
       });
     });
