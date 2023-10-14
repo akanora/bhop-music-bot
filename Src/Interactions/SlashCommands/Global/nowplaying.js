@@ -12,7 +12,7 @@ module.exports = {
 
     if (!queue) {
       return interaction.reply({
-        content: queue ? `There is no track **currently** playing` : `I am **not** in a voice channel`,
+        content: `There is no track **currently** playing`,
         ephemeral: true,
       });
     }
