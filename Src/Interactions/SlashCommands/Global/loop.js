@@ -1,12 +1,12 @@
 const { QueueRepeatMode, useQueue } = require('discord-player');
 const { ApplicationCommandOptionType } = require('discord.js');
 
-const repeatModes = [
-  { name: 'Off', value: QueueRepeatMode.OFF },
-  { name: 'Track', value: QueueRepeatMode.TRACK },
-  { name: 'Queue', value: QueueRepeatMode.QUEUE },
-  { name: 'Autoplay', value: QueueRepeatMode.AUTOPLAY },
-];
+const repeatModes = {
+  off: QueueRepeatMode.OFF,
+  track: QueueRepeatMode.TRACK,
+  queue: QueueRepeatMode.QUEUE,
+  autoplay: QueueRepeatMode.AUTOPLAY,
+};
 
 module.exports = {
   name: 'loop',
@@ -19,40 +19,38 @@ module.exports = {
       description: 'Choose a loop mode.',
       type: ApplicationCommandOptionType.String,
       required: true,
-      choices: repeatModes.map(mode => ({
-        name: mode.name,
-        value: mode.name.toLowerCase(),
+      choices: Object.keys(repeatModes).map(modeName => ({
+        name: modeName.charAt(0).toUpperCase() + modeName.slice(1), // Capitalize the mode name
+        value: modeName,
       })),
     },
   ],
   run: async (client, interaction) => {
     const queue = useQueue(interaction.guildId);
 
-    if (!queue)
+    if (!queue || !queue.currentTrack) {
       return interaction.reply({
-        content: `I am **not** in a voice channel`,
+        content: queue ? `There is no track **currently** playing` : `I am **not** in a voice channel`,
         ephemeral: true,
       });
-
-    if (!queue.currentTrack)
-      return interaction.reply({
-        content: `There is no track **currently** playing`,
-        ephemeral: true,
-      });
+    }
 
     const modeName = interaction.options.getString('mode', true);
-    const mode = repeatModes.find(m => m.name.toLowerCase() === modeName);
+    const modeValue = repeatModes[modeName.toLowerCase()];
 
-    if (!mode)
+    if (modeValue === undefined) {
       return interaction.reply({
         content: `Invalid loop mode: ${modeName}`,
         ephemeral: true,
       });
+    }
 
-    queue.setRepeatMode(mode.value);
+    queue.setRepeatMode(modeValue);
 
     return interaction.reply({
-      content: `**${mode.name}** has been **${mode.value === queue.repeatMode ? 'enabled' : 'disabled'}**`,
+      content: `**${modeName.charAt(0).toUpperCase() + modeName.slice(1)}** has been **${
+        modeValue === queue.repeatMode ? 'enabled' : 'disabled'
+      }**`,
     });
   },
 };
