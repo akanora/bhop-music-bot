@@ -41,6 +41,12 @@ module.exports = {
         text: `Page ${currentPage + 1} | Total ${queue.tracks.size} tracks`,
       });
 
+    if (pages === 1) {
+      return interaction.reply({
+        embeds: [embed],
+      });
+    }
+
     const prevButton = new ButtonBuilder()
       .setCustomId('prev')
       .setLabel('Previous')
