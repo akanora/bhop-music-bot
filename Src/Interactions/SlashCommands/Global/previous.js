@@ -1,4 +1,5 @@
 const { useQueue } = require('discord-player');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
   name: 'previous',
