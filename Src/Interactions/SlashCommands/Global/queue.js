@@ -9,22 +9,19 @@ module.exports = {
   run: async (client, interaction) => {
     const queue = useQueue(interaction.guildId);
 
-    if (!queue)
-      return interaction.reply({
-        content: `I am **not** in a voice channel`,
-        ephemeral: true,
-      });
+    if (!interaction.member.voice.channelId)
+      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
+    if (
+      interaction.guild.members.me.voice.channelId &&
+      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
+    )
+      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
 
-    const formatTracks = queue.tracks.toArray();
+    const queuedTracks = queue.tracks.toArray();
+    if (!queuedTracks[0])
+      return interaction.reply({ content: `❌ | There is no music is currently in the queue!`, ephemeral: true });
 
-    if (formatTracks.length === 0) {
-      return interaction.reply({
-        content: `There is **no** queue to **display**`,
-        ephemeral: true,
-      });
-    }
-
-    const tracks = formatTracks.map((track, idx) => `**${idx + 1})** [${track.title}](${track.url})`);
+    const tracks = queuedTracks.map((track, idx) => `**${idx + 1})** [${track.title}](${track.url})`);
 
     const chunkSize = 10;
     const pages = Math.ceil(tracks.length / chunkSize);

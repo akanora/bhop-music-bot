@@ -1,4 +1,4 @@
-const { useMainPlayer } = require('discord-player');
+const { useMainPlayer, QueryType } = require('discord-player');
 
 const player = useMainPlayer();
 
@@ -36,35 +36,27 @@ module.exports = {
   },
   run: async (client, interaction) => {
     await interaction.deferReply();
-
     const query = interaction.options.getString('query', true);
 
     try {
-      const memberVoiceChannel = interaction.member.voice.channel;
-      const botVoiceChannel = interaction.guild.members.me.voice.channel;
+      if (!interaction.member.voice.channelId)
+        return await interaction.followUp({ content: '❌ | You are not in a voice channel!', ephemeral: true });
+      if (
+        interaction.guild.members.me.voice.channelId &&
+        interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
+      )
+        return await interaction.followUp({ content: '❌ | You are not in my voice channel!', ephemeral: true });
 
-      if (!memberVoiceChannel) {
+      const searchResult = await player.search(query, { requestedBy: interaction.user, searchEngine: QueryType.AUTO });
+
+      if (!searchResult || searchResult.tracks.length == 0 || !searchResult.tracks) {
         return interaction.followUp({
-          content: 'You are not in a voice channel!',
+          content: `❌ | Ooops... something went wrong, couldn't find the song with the requested query.`,
           ephemeral: true,
         });
       }
 
-      if (botVoiceChannel && memberVoiceChannel.id !== botVoiceChannel.id) {
-        await interaction.followUp({
-          content: 'You are not in my voice channel!',
-          ephemeral: true,
-        });
-        return;
-      }
-
-      const searchResult = await player.search(query, { requestedBy: interaction.user });
-
-      if (!searchResult.hasTracks()) {
-        return interaction.followUp(`We found no tracks for ${query}!`);
-      }
-
-      const res = await player.play(memberVoiceChannel.id, searchResult, {
+      const res = await player.play(interaction.member.voice.channel.id, searchResult, {
         nodeOptions: {
           metadata: {
             channel: interaction.channel,
@@ -86,7 +78,7 @@ module.exports = {
         ? `Successfully enqueued **track(s)** from: **${res.track.playlist.title}**`
         : `Successfully enqueued: **${res.track.author} - ${res.track.title}**`;
 
-      return interaction.editReply({
+      return interaction.followUp({
         content: message,
       });
     } catch (error) {

@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = {
   name: 'reload',
   type: 1,
@@ -22,13 +20,11 @@ module.exports = {
       return interaction.reply(`There is no command with name \`${commandName}\`!`);
     }
 
-    const filePath = path.join(__dirname, `${command.name}.js`);
-
-    delete require.cache[require.resolve(filePath)];
+    delete require.cache[require.resolve(`${__dirname}/${command.name}.js`)];
 
     try {
       client.slashCommands.delete(command.name);
-      const newCommand = require(filePath);
+      const newCommand = require(`${__dirname}/${command.name}.js`);
       client.slashCommands.set(newCommand.name, newCommand);
       await interaction.reply(`Command \`${newCommand.name}\` was reloaded!`);
     } catch (error) {

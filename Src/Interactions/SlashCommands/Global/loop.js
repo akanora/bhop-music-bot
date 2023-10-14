@@ -1,5 +1,5 @@
 const { QueueRepeatMode, useQueue } = require('discord-player');
-const { ApplicationCommandOptionType } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 
 const repeatModes = {
   off: QueueRepeatMode.OFF,
@@ -28,29 +28,48 @@ module.exports = {
   run: async (client, interaction) => {
     const queue = useQueue(interaction.guildId);
 
-    if (!queue || !queue.currentTrack) {
-      return interaction.reply({
-        content: queue ? `There is no track **currently** playing` : `I am **not** in a voice channel`,
-        ephemeral: true,
-      });
-    }
+    if (!interaction.member.voice.channelId)
+      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
+    if (
+      interaction.guild.members.me.voice.channelId &&
+      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
+    )
+      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
+
+    if (!queue || !queue.isPlaying())
+      return interaction.reply({ content: `❌ | No music is currently being played!`, ephemeral: true });
 
     const modeName = interaction.options.getString('mode', true);
     const modeValue = repeatModes[modeName.toLowerCase()];
 
-    if (modeValue === undefined) {
-      return interaction.reply({
-        content: `Invalid loop mode: ${modeName}`,
+    const mode =
+      modeName === 'track'
+        ? 'Loop mode on 🔂'
+        : modeName === 'queue'
+        ? 'Loop mode on 🔁'
+        : modeName === 'autoplay'
+        ? 'Loop mode on 🤖'
+        : 'Loop mode off 📴';
+
+    const loopembed = new EmbedBuilder()
+      .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+      .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
+      .setColor('#FF0000')
+      .setTitle(mode)
+      .setDescription(`The loop mode has been set to ${modeName}!`)
+      .setTimestamp()
+      .setFooter({
+        text: `Requested by: ${interaction.user.discriminator != 0 ? interaction.user.tag : interaction.user.username}`,
+      });
+
+    try {
+      queue.setRepeatMode(modeValue);
+      interaction.reply({ embeds: [loopembed] });
+    } catch (err) {
+      interaction.reply({
+        content: `❌ | Ooops... something went wrong, there was an error switching loop mode. Please try again.`,
         ephemeral: true,
       });
     }
-
-    queue.setRepeatMode(modeValue);
-
-    return interaction.reply({
-      content: `**${modeName.charAt(0).toUpperCase() + modeName.slice(1)}** has been **${
-        modeValue === queue.repeatMode ? 'enabled' : 'disabled'
-      }**`,
-    });
   },
 };

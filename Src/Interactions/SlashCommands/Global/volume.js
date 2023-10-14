@@ -1,5 +1,5 @@
-const { useQueue, useTimeline } = require('discord-player');
-const { ApplicationCommandOptionType } = require('discord.js');
+const { useQueue } = require('discord-player');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = {
   name: 'volume',
@@ -17,24 +17,38 @@ module.exports = {
     },
   ],
   run: async (client, interaction) => {
-    const timeline = useTimeline(interaction.guildId);
+    const vol = interaction.options.getInteger('volume');
     const queue = useQueue(interaction.guildId);
-    const volume = interaction.options.getInteger('volume');
 
-    if (!queue)
-      return interaction.reply({
-        content: `I am not in a voice channel`,
+    if (!interaction.member.voice.channelId)
+      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
+    if (
+      interaction.guild.members.me.voice.channelId &&
+      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
+    )
+      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
+    if (!queue || !queue.isPlaying())
+      return interaction.reply({ content: `❌ | No music is currently being played!`, ephemeral: true });
+
+    const volumeembed = new EmbedBuilder()
+      .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+      .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
+      .setColor('#FF0000')
+      .setTitle(`Volume adjusted 🎧`)
+      .setDescription(`The volume has been set to **${vol}%**!`)
+      .setTimestamp()
+      .setFooter({
+        text: `Requested by: ${interaction.user.discriminator != 0 ? interaction.user.tag : interaction.user.username}`,
+      });
+
+    try {
+      queue.node.setVolume(vol);
+      interaction.reply({ embeds: [volumeembed] });
+    } catch (err) {
+      interaction.reply({
+        content: `❌ | Ooops... something went wrong, there was an error adjusting the volume. Please try again.`,
         ephemeral: true,
       });
-    if (!queue.currentTrack)
-      return interaction.reply({
-        content: `There is no track **currently** playing`,
-        ephemeral: true,
-      });
-
-    timeline.setVolume(volume);
-    return interaction.reply({
-      content: `I **changed** the volume to: **${timeline.volume}%**`,
-    });
+    }
   },
 };

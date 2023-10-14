@@ -1,4 +1,4 @@
-const { useHistory } = require('discord-player');
+const { useHistory, useQueue } = require('discord-player');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 module.exports = {
@@ -8,23 +8,27 @@ module.exports = {
   guildCooldown: 1000,
   run: async (client, interaction) => {
     const history = useHistory(interaction.guildId);
+    const queue = useQueue(interaction.guildId);
 
-    if (!history)
+    if (!interaction.member.voice.channelId)
+      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
+    if (
+      interaction.guild.members.me.voice.channelId &&
+      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
+    )
+      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
+
+    if (!queue || !queue.isPlaying())
+      return interaction.reply({ content: `❌ | No music is currently being played!`, ephemeral: true });
+
+    const previousTracks = history.tracks.toArray();
+    if (!previousTracks[0])
       return interaction.reply({
-        content: `I have **not** played any songs yet.`,
+        content: `❌ | There is no music history prior to the current song. Please try again.`,
         ephemeral: true,
       });
 
-    const formatTracks = history.tracks.toArray();
-
-    if (formatTracks.length === 0) {
-      return interaction.reply({
-        content: `There is **no** history to **display**`,
-        ephemeral: true,
-      });
-    }
-
-    const tracks = formatTracks.map((track, idx) => `**${idx + 1})** [${track.title}](${track.url})`);
+    const tracks = previousTracks.map((track, idx) => `**${idx + 1})** [${track.title}](${track.url})`);
 
     const chunkSize = 10;
     const pages = Math.ceil(tracks.length / chunkSize);
