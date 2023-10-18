@@ -5,8 +5,12 @@ module.exports = {
     const slashCommand = client.slashCommands.get(interaction.commandName);
     if (interaction.type == 4) {
       if (slashCommand.autocomplete) {
-        const choices = [];
-        await slashCommand.autocomplete(interaction, choices);
+        try {
+          const choices = [];
+          await slashCommand.autocomplete(interaction, choices);
+        } catch {
+          return;
+        }
       }
     }
     if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {

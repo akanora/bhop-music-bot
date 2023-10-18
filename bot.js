@@ -30,14 +30,17 @@
     partials: [Partials.Channel],
   });
 
-  const player = new Player(botClient);
+  const player = new Player(botClient, {
+    smoothVolume: true,
+    ytdlOptions: {
+      filter: 'audioonly',
+      quality: 'highestaudio',
+      highWaterMark: 1 << 30,
+      dlChunkSize: 0,
+    },
+  });
 
   await player.extractors.loadDefault();
-
-  player.events.on('playerStart', (queue, track) => {
-    // we will later define queue.metadata object while creating the queue
-    queue.metadata.channel.send(`Started playing **${track.title}**!`);
-  });
 
   exports.rootPath = dirPath;
   exports.client = botClient;

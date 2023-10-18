@@ -29,7 +29,7 @@ module.exports = {
       });
     }
 
-    result.tracks.slice(0, 25).forEach(track => {
+    result.tracks.slice(0, 24).forEach(track => {
       let name = `${track.title} | ${track.author ?? 'Unknown'} (${track.duration ?? 'n/a'})`;
       if (name.length > 100) name = `${name.slice(0, 97)}...`;
 
