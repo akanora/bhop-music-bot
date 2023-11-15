@@ -31,13 +31,12 @@
   });
 
   const player = new Player(botClient, {
-    smoothVolume: true,
+    useLegacyFFmpeg: false,
+    skipFFmpeg: false,
     ytdlOptions: {
-      filter: 'audioonly',
-      quality: 'highestaudio',
-      highWaterMark: 1 << 30,
-      dlChunkSize: 0,
-    },
+        quality: 'highestaudio',
+        highWaterMark: 1 << 25,
+    }
   });
 
   await player.extractors.loadDefault();
