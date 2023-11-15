@@ -5,7 +5,7 @@ BHop Music Bot is a Discord bot that can play music in your voice channels. It i
 ## Getting Started
 
 1. Clone the repository: `git clone https://github.com/akanora/bhop-music-bot.git`
-2. Install dependencies: `npm install` & `sudo apt install ffmpeg`
+2. Install dependencies: `npm install`
 3. Edit Src/Credentials/Config.js with the following values:
   prefix: ['yourprefix'],
   botToken: 'yourtoken',
