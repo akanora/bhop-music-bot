@@ -2,6 +2,8 @@ const { useMainPlayer } = require('discord-player');
 const player = useMainPlayer();
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, PermissionFlagsBits } = require('discord.js');
 
+let previousMessageId = null; // Store the ID of the previous message
+
 module.exports = {
   name: 'playerStart',
   customEvent: true,
@@ -54,11 +56,23 @@ module.exports = {
         return console.log(`No Perms! (ID: ${queue.guild.id})`);
       }
 
-      // Send message
+      // Delete the previous message if it exists
+      if (previousMessageId) {
+        try {
+          const oldMessage = await queue.metadata.channel.messages.fetch(previousMessageId);
+          await oldMessage.delete();
+        } catch {
+          console.log(`Failed to delete previous message! (ID: ${queue.guild.id})`);
+        }
+      }
+
+      // Send new message and store its ID
       const msg = await queue.metadata.channel.send({
         embeds: [npEmbed],
         components,
       });
+
+      previousMessageId = msg.id; // Update the stored message ID
 
       // Create filter for collector
       const filter = (message) => {
