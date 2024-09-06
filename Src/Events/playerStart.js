@@ -1,8 +1,47 @@
 const { useMainPlayer } = require('discord-player');
-const player = useMainPlayer();
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, PermissionFlagsBits } = require('discord.js');
 
-let previousMessageId = null; // Store the ID of the previous message
+const player = useMainPlayer();
+let previousMessageId = null;
+
+const createButton = (id, style, label) => 
+  new ButtonBuilder()
+    .setCustomId(id)
+    .setStyle(style)
+    .setLabel(label);
+
+const createEmbed = (clientUser, track, progressBar) => {
+  const npEmbed = new EmbedBuilder()
+    .setAuthor({ name: clientUser.tag, iconURL: clientUser.displayAvatarURL() })
+    .setThumbnail(track.thumbnail)
+    .setColor('#FF0000')
+    .setTitle('Starting next song... Now Playing 🎵')
+    .setDescription(`${track.title}${track.queryType !== 'arbitrary' ? ` ([Link](${track.url}))` : ''}\n${progressBar}`)
+    .setTimestamp();
+
+  if (track.requestedBy) {
+    const requesterTag = track.requestedBy.discriminator !== 0 ? track.requestedBy.tag : track.requestedBy.username;
+    npEmbed.setFooter({ text: `Requested by: ${requesterTag}` });
+  }
+
+  return npEmbed;
+};
+
+const createComponents = () => [
+  new ActionRowBuilder().addComponents(
+    createButton('np-delete', 4, '🗑️'),
+    createButton('np-back', 1, '⏮️ Previous'),
+    createButton('np-pauseresume', 1, '⏯️ Play/Pause'),
+    createButton('np-skip', 1, '⏭️ Skip'),
+    createButton('np-clear', 1, '🧹 Clear Queue')
+  ),
+  new ActionRowBuilder().addComponents(
+    createButton('np-volumeadjust', 1, '🔊 Adjust Volume'),
+    createButton('np-loop', 1, '🔂 Loop Once'),
+    createButton('np-shuffle', 1, '🔀 Shuffle Queue'),
+    createButton('np-stop', 1, '🛑 Stop Queue')
+  )
+];
 
 module.exports = {
   name: 'playerStart',
@@ -10,99 +49,37 @@ module.exports = {
   run: async (client, rootPath) => {
     player.events.on('playerStart', async (queue, track) => {
       const progressBar = queue.node.createProgressBar().replace(/ 0:00/g, ' ◉ LIVE');
-      const trackTitle = queue.currentTrack.title;
-      const trackUrl = queue.currentTrack.url;
-      const requestedBy = queue.currentTrack.requestedBy;
-      const isArbitraryQuery = track.queryType === 'arbitrary';
-      const thumbnail = queue.currentTrack.thumbnail;
       const clientUser = player.client.user;
 
-      // Create embed
-      const npEmbed = new EmbedBuilder()
-        .setAuthor({ name: clientUser.tag, iconURL: clientUser.displayAvatarURL() })
-        .setThumbnail(thumbnail)
-        .setColor('#FF0000')
-        .setTitle(`Starting next song... Now Playing 🎵`)
-        .setDescription(`${trackTitle}${!isArbitraryQuery ? ` ([Link](${trackUrl}))` : ''}\n${progressBar}`)
-        .setTimestamp();
+      const npEmbed = createEmbed(clientUser, track, progressBar);
+      const components = createComponents();
+      const channel = queue.metadata.channel;
 
-      if (requestedBy) {
-        const requesterTag = requestedBy.discriminator !== 0 ? requestedBy.tag : requestedBy.username;
-        npEmbed.setFooter({ text: `Requested by: ${requesterTag}` });
-      }
-
-      // Create buttons
-      const createButton = (id, style, label) => new ButtonBuilder().setCustomId(id).setStyle(style).setLabel(label);
-
-      const actionRow1 = new ActionRowBuilder().addComponents(
-        createButton('np-delete', 4, '🗑️'),
-        createButton('np-back', 1, '⏮️ Previous'),
-        createButton('np-pauseresume', 1, '⏯️ Play/Pause'),
-        createButton('np-skip', 1, '⏭️ Skip'),
-        createButton('np-clear', 1, '🧹 Clear Queue')
-      );
-
-      const actionRow2 = new ActionRowBuilder().addComponents(
-        createButton('np-volumeadjust', 1, '🔊 Adjust Volume'),
-        createButton('np-loop', 1, '🔂 Loop Once'),
-        createButton('np-shuffle', 1, '🔀 Shuffle Queue'),
-        createButton('np-stop', 1, '🛑 Stop Queue')
-      );
-
-      const components = [actionRow1, actionRow2];
-
-      // Check for message permissions
-      if (!queue.guild.members.me.permissionsIn(queue.metadata.channel).has(PermissionFlagsBits.SendMessages)) {
-        return console.log(`No Perms! (ID: ${queue.guild.id})`);
+      if (!channel.permissionsFor(channel.guild.members.me).has(PermissionFlagsBits.SendMessages)) {
+        console.error(`No permissions to send messages in channel ID: ${channel.id}`);
+        return;
       }
 
       // Delete the previous message if it exists
       if (previousMessageId) {
         try {
-          const oldMessage = await queue.metadata.channel.messages.fetch(previousMessageId);
-          await oldMessage.delete();
-        } catch {
-          console.log(`Failed to delete previous message! (ID: ${queue.guild.id})`);
+          const oldMessage = await channel.messages.fetch(previousMessageId);
+          if (oldMessage) await oldMessage.delete();
+        } catch (error) {
+          console.error(`Failed to delete previous message: ${error.message}`);
         }
       }
 
       // Send new message and store its ID
-      const msg = await queue.metadata.channel.send({
-        embeds: [npEmbed],
-        components,
-      });
-
-      previousMessageId = msg.id; // Update the stored message ID
-
-      // Create filter for collector
-      const filter = (message) => {
-        const embedTitle = message.embeds[0]?.title;
-        return ['Starting next song... Now Playing 🎵', 'Stopped music 🛑', 'Disconnecting 🛑', 'Ending playback 🛑', 'Queue Finished 🛑'].includes(embedTitle);
-      };
-
-      // Create collector
-      const collector = queue.metadata.channel.createMessageCollector({
-        filter,
-        limit: 1,
-        time: track.durationMS * 3,
-      });
-
-      // Handle collector events
-      collector.on('collect', async () => {
-        try {
-          await msg.edit({ components: [] });
-        } catch {
-          console.log(`Now playing msg no longer exists! (ID: ${queue.guild.id})`);
-        }
-      });
-
-      collector.on('end', async () => {
-        try {
-          await msg.edit({ components: [] });
-        } catch {
-          console.log(`Now playing msg no longer exists! (ID: ${queue.guild.id})`);
-        }
-      });
+      try {
+        const msg = await channel.send({
+          embeds: [npEmbed],
+          components,
+        });
+        previousMessageId = msg.id;
+      } catch (error) {
+        console.error(`Failed to send new message: ${error.message}`);
+      }
     });
   },
 };
