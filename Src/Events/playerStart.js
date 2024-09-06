@@ -7,93 +7,85 @@ module.exports = {
   customEvent: true,
   run: async (client, rootPath) => {
     player.events.on('playerStart', async (queue, track) => {
-      const progress = queue.node.createProgressBar();
-      var createBar = progress.replace(/ 0:00/g, ' ◉ LIVE');
+      const progressBar = queue.node.createProgressBar().replace(/ 0:00/g, ' ◉ LIVE');
+      const trackTitle = queue.currentTrack.title;
+      const trackUrl = queue.currentTrack.url;
+      const requestedBy = queue.currentTrack.requestedBy;
+      const isArbitraryQuery = track.queryType === 'arbitrary';
+      const thumbnail = queue.currentTrack.thumbnail;
+      const clientUser = player.client.user;
 
-      const npembed = new EmbedBuilder()
-        .setAuthor({ name: player.client.user.tag, iconURL: player.client.user.displayAvatarURL() })
-        .setThumbnail(queue.currentTrack.thumbnail)
+      // Create embed
+      const npEmbed = new EmbedBuilder()
+        .setAuthor({ name: clientUser.tag, iconURL: clientUser.displayAvatarURL() })
+        .setThumbnail(thumbnail)
         .setColor('#FF0000')
         .setTitle(`Starting next song... Now Playing 🎵`)
-        .setDescription(
-          `${queue.currentTrack.title} ${
-            track.queryType != 'arbitrary' ? `([Link](${queue.currentTrack.url}))` : ''
-          }\n${createBar}`,
-        )
+        .setDescription(`${trackTitle}${!isArbitraryQuery ? ` ([Link](${trackUrl}))` : ''}\n${progressBar}`)
         .setTimestamp();
 
-      if (queue.currentTrack.requestedBy != null) {
-        npembed.setFooter({
-          text: `Requested by: ${
-            queue.currentTrack.requestedBy.discriminator != 0
-              ? queue.currentTrack.requestedBy.tag
-              : queue.currentTrack.requestedBy.username
-          }`,
-        });
+      if (requestedBy) {
+        const requesterTag = requestedBy.discriminator !== 0 ? requestedBy.tag : requestedBy.username;
+        npEmbed.setFooter({ text: `Requested by: ${requesterTag}` });
       }
 
-      var finalComponents = [
-        (actionbutton = new ActionRowBuilder().addComponents(
-          new ButtonBuilder().setCustomId('np-delete').setStyle(4).setLabel('🗑️'),
-          new ButtonBuilder().setCustomId('np-back').setStyle(1).setLabel('⏮️ Previous'),
-          new ButtonBuilder().setCustomId('np-pauseresume').setStyle(1).setLabel('⏯️ Play/Pause'),
-          new ButtonBuilder().setCustomId('np-skip').setStyle(1).setLabel('⏭️ Skip'),
-          new ButtonBuilder().setCustomId('np-clear').setStyle(1).setLabel('🧹 Clear Queue'),
-        )),
-        (actionbutton2 = new ActionRowBuilder().addComponents(
-          new ButtonBuilder().setCustomId('np-volumeadjust').setStyle(1).setLabel('🔊 Adjust Volume'),
-          new ButtonBuilder().setCustomId('np-loop').setStyle(1).setLabel('🔂 Loop Once'),
-          new ButtonBuilder().setCustomId('np-shuffle').setStyle(1).setLabel('🔀 Shuffle Queue'),
-          new ButtonBuilder().setCustomId('np-stop').setStyle(1).setLabel('🛑 Stop Queue'),
-        )),
-      ];
+      // Create buttons
+      const createButton = (id, style, label) => new ButtonBuilder().setCustomId(id).setStyle(style).setLabel(label);
 
-      //Check if bot has message perms
-      if (!queue.guild.members.me.permissionsIn(queue.metadata.channel).has(PermissionFlagsBits.SendMessages))
+      const actionRow1 = new ActionRowBuilder().addComponents(
+        createButton('np-delete', 4, '🗑️'),
+        createButton('np-back', 1, '⏮️ Previous'),
+        createButton('np-pauseresume', 1, '⏯️ Play/Pause'),
+        createButton('np-skip', 1, '⏭️ Skip'),
+        createButton('np-clear', 1, '🧹 Clear Queue')
+      );
+
+      const actionRow2 = new ActionRowBuilder().addComponents(
+        createButton('np-volumeadjust', 1, '🔊 Adjust Volume'),
+        createButton('np-loop', 1, '🔂 Loop Once'),
+        createButton('np-shuffle', 1, '🔀 Shuffle Queue'),
+        createButton('np-stop', 1, '🛑 Stop Queue')
+      );
+
+      const components = [actionRow1, actionRow2];
+
+      // Check for message permissions
+      if (!queue.guild.members.me.permissionsIn(queue.metadata.channel).has(PermissionFlagsBits.SendMessages)) {
         return console.log(`No Perms! (ID: ${queue.guild.id})`);
-      var msg = await queue.metadata.channel.send({
-        embeds: [npembed],
-        components: finalComponents,
+      }
+
+      // Send message
+      const msg = await queue.metadata.channel.send({
+        embeds: [npEmbed],
+        components,
       });
 
-      //----- Dyanmic Button Removal (main drawback being efficiency, but benefit being that it will only remove buttons once the next songs begins, ensuring they always stay) -----
-      const filter = collectorMsg => {
-        if (collectorMsg.embeds[0]) {
-          if (
-            collectorMsg.embeds[0].title == 'Starting next song... Now Playing 🎵' ||
-            collectorMsg.embeds[0].title == 'Stopped music 🛑' ||
-            collectorMsg.embeds[0].title == 'Disconnecting 🛑' ||
-            collectorMsg.embeds[0].title == 'Ending playback 🛑' ||
-            collectorMsg.embeds[0].title == 'Queue Finished 🛑'
-          ) {
-            return true;
-          } else {
-            return false;
-          }
-        } else {
-          return false;
-        }
+      // Create filter for collector
+      const filter = (message) => {
+        const embedTitle = message.embeds[0]?.title;
+        return ['Starting next song... Now Playing 🎵', 'Stopped music 🛑', 'Disconnecting 🛑', 'Ending playback 🛑', 'Queue Finished 🛑'].includes(embedTitle);
       };
+
+      // Create collector
       const collector = queue.metadata.channel.createMessageCollector({
         filter,
         limit: 1,
-        time: queue.currentTrack.durationMS * 3,
+        time: track.durationMS * 3,
       });
 
-      //Remove the buttons if the next song event runs (due to song skip... etc)
+      // Handle collector events
       collector.on('collect', async () => {
         try {
-          msg.edit({ components: [] });
-        } catch (err) {
+          await msg.edit({ components: [] });
+        } catch {
           console.log(`Now playing msg no longer exists! (ID: ${queue.guild.id})`);
         }
       });
 
-      //Remove the buttons once it expires
       collector.on('end', async () => {
         try {
-          msg.edit({ components: [] });
-        } catch (err) {
+          await msg.edit({ components: [] });
+        } catch {
           console.log(`Now playing msg no longer exists! (ID: ${queue.guild.id})`);
         }
       });
