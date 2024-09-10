@@ -17,31 +17,37 @@ module.exports = {
     },
   ],
   autocomplete: async interaction => {
-    const query = interaction.options.getString('query');
-    if (!query) return [];
-    const result = await player.search(query);
-
-    const returnData = [];
-    if (result.playlist) {
-      returnData.push({
-        name: 'Playlist | ' + result.playlist.title,
-        value: query,
+    try {
+      const query = interaction.options.getString('query');
+      if (!query) return [];
+  
+      const result = await player.search(query);
+  
+      const returnData = [];
+      if (result.playlist) {
+        returnData.push({
+          name: 'Playlist | ' + result.playlist.title,
+          value: query,
+        });
+      }
+  
+      result.tracks.slice(0, 24).forEach(track => {
+        let name = `${track.title} | ${track.author ?? 'Unknown'} (${track.duration ?? 'n/a'})`;
+        if (name.length > 100) name = `${name.slice(0, 97)}...`;
+  
+        let url = track.url;
+        if (url.length > 100) url = url.slice(0, 100);
+        return returnData.push({
+          name,
+          value: url,
+        });
       });
+  
+      // Respond to the autocomplete interaction
+      await interaction.respond(returnData);
+    } catch (error) {
+      console.error('Autocomplete error:', error);
     }
-
-    result.tracks.slice(0, 24).forEach(track => {
-      let name = `${track.title} | ${track.author ?? 'Unknown'} (${track.duration ?? 'n/a'})`;
-      if (name.length > 100) name = `${name.slice(0, 97)}...`;
-
-      let url = track.url;
-      if (url.length > 100) url = url.slice(0, 100);
-      return returnData.push({
-        name,
-        value: url,
-      });
-    });
-
-    await interaction.respond(returnData);
   },
   run: async (client, interaction) => {
     await interaction.deferReply();
