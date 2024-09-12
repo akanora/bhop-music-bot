@@ -1,3 +1,18 @@
+const { player } = require('./player');  // Adjust the path as needed
+
+async function handleAutocomplete(interaction) {
+  try {
+    const query = interaction.options.getString('query');
+    if (!query) return [];
+
+    const result = await player.search(query);
+    return buildAutocompleteResponse(result, query);
+  } catch (error) {
+    console.error('Autocomplete error:', error);
+    return [];
+  }
+}
+
 function buildAutocompleteResponse(result, query) {
   const returnData = [];
   if (result.playlist) {
@@ -16,4 +31,4 @@ function buildAutocompleteResponse(result, query) {
   return returnData;
 }
 
-module.exports = { buildAutocompleteResponse };
+module.exports = { buildAutocompleteResponse, handleAutocomplete };

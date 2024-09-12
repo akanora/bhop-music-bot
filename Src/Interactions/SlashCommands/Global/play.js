@@ -1,11 +1,11 @@
 const { QueryType } = require('discord-player');
 const { 
-  buildAutocompleteResponse, 
   validateVoiceChannel, 
   playTrack, 
   buildSuccessMessage, 
   player 
 } = require('../../../Structures/music');
+const { handleAutocomplete } = require('../../../Structures/music/autocomplete');
 
 module.exports = {
   name: 'play',
@@ -22,16 +22,8 @@ module.exports = {
     },
   ],
   autocomplete: async interaction => {
-    const query = interaction.options.getString('query');
-    if (!query) return [];
-
-    try {
-      const result = await player.search(query);
-      return buildAutocompleteResponse(result, query);
-    } catch (error) {
-      console.error('Autocomplete error:', error);
-      return [];
-    }
+    const results = await handleAutocomplete(interaction);
+    await interaction.respond(results);
   },
   run: async (client, interaction) => {
     await interaction.deferReply();
