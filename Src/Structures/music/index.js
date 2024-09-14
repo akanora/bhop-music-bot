@@ -22,6 +22,7 @@ module.exports = {
     createSkipEmbed: embeds.createSkipEmbed,
     createStopEmbed: embeds.createStopEmbed,
     createVolumeEmbed: embeds.createVolumeEmbed,
+    createUptimeEmbed: embeds.createUptimeEmbed,
   },
   buttons: {
     createQueueButtons: buttons.createQueueButtons,

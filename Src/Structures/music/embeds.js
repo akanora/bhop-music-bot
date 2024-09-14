@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, time } = require('discord.js');
 const EMBED_COLOR = '#FF0000';
 
 function getUserTag(user) {
@@ -173,4 +173,18 @@ function createVolumeEmbed(vol, interaction) {
   });
 }
 
-module.exports = { createQueueEmbed, createPreviousEmbed, createClearEmbed, createHistoryEmbed, createLoopEmbed, createPlayingEmbed, createPauseEmbed, createShuffleEmbed, createSkipEmbed, createStopEmbed, createVolumeEmbed };
+function createUptimeEmbed(upSince, upTime, interaction) {
+  return new EmbedBuilder()
+  .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
+  .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
+  .setColor(EMBED_COLOR)
+  .setTitle(`Uptime ⏳`)
+  .setDescription(
+    `**Up since:** ${time(upSince, "F")} **Time:** ${upTime}`)
+  .setTimestamp()
+  .setFooter({
+    text: `Requested by: ${getUserTag(interaction.user)}`,
+  });
+}
+
+module.exports = { createQueueEmbed, createPreviousEmbed, createClearEmbed, createHistoryEmbed, createLoopEmbed, createPlayingEmbed, createPauseEmbed, createShuffleEmbed, createSkipEmbed, createStopEmbed, createVolumeEmbed, createUptimeEmbed };
