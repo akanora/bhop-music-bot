@@ -1,6 +1,7 @@
 const directorySearch = require('node-recursive-directory');
 const { REST, Routes } = require('discord.js');
 const readFiles = require('../ReadAllFiles');
+const path = require('node:path');
 
 module.exports = async (client, rootPath) => {
   const globalSlashCommandsFiles = await directorySearch(`${rootPath}/Src/Interactions/SlashCommands/Global`);
@@ -31,7 +32,7 @@ module.exports = async (client, rootPath) => {
   if (allGuildsSlashCommandsFiles?.length > 0) {
     for (const guild of allGuildsSlashCommandsFiles) {
       let ASCOA = []; // All commands of this particular guild as an array of objects.
-      const guildId = guild.flat(9999)[0].split(`${rootPath}/Src/Interactions/SlashCommands/Guilds`)[1].split('/')[1];
+      const guildId = path.basename(path.dirname(guild.flat(9999)[0]));
       for (const commandFile of guild.flat(9999)) {
         const guildCommand = require(commandFile);
         if (!guildCommand.name || guildCommand.ignore || !guildCommand.run) continue;
