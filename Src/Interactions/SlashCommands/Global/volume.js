@@ -1,5 +1,9 @@
-const { useQueue } = require('discord-player');
-const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
+const { 
+  validation: { validateVoiceChannel, isPlaying },
+  player: { player },
+  embeds: { createVolumeEmbed },
+} = require('../../../Structures/music');
+const { ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = {
   name: 'volume',
@@ -17,35 +21,19 @@ module.exports = {
     },
   ],
   run: async (client, interaction) => {
-    const vol = interaction.options.getInteger('volume');
-    const queue = useQueue(interaction.guildId);
-
-    if (!interaction.member.voice.channelId)
-      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
-    if (
-      interaction.guild.members.me.voice.channelId &&
-      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
-    )
-      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
-    if (!queue || !queue.isPlaying())
-      return interaction.reply({ content: `❌ | No music is currently being played!`, ephemeral: true });
-
-    const volumeembed = new EmbedBuilder()
-      .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-      .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-      .setColor('#FF0000')
-      .setTitle(`Volume adjusted 🎧`)
-      .setDescription(`The volume has been set to **${vol}%**!`)
-      .setTimestamp()
-      .setFooter({
-        text: `Requested by: ${interaction.user.discriminator != 0 ? interaction.user.tag : interaction.user.username}`,
-      });
-
     try {
+      await interaction.deferReply();
+      const queue = player.nodes.get(interaction.guild.id);
+      if (!await validateVoiceChannel(interaction)) return;
+      if (!await isPlaying(queue, interaction)) return;
+
+      const vol = interaction.options.getInteger('volume');
+      const volumeembed = createVolumeEmbed(vol, interaction)
+
       queue.node.setVolume(vol);
-      interaction.reply({ embeds: [volumeembed] });
+      interaction.followUp({ embeds: [volumeembed] });
     } catch (err) {
-      interaction.reply({
+      interaction.followUp({
         content: `❌ | Ooops... something went wrong, there was an error adjusting the volume. Please try again.`,
         ephemeral: true,
       });

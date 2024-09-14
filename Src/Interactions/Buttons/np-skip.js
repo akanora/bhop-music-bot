@@ -1,46 +1,29 @@
-const { useQueue } = require('discord-player');
-const { EmbedBuilder } = require('discord.js');
+const { 
+  validation: { validateVoiceChannel, isPlaying },
+  player: { player },
+  embeds: { createSkipEmbed },
+} = require('../../Structures/music');
+
 
 module.exports = {
   name: 'np-skip',
   run: async (client, interaction) => {
-    const queue = useQueue(interaction.guildId);
-
-    if (!interaction.member.voice.channelId)
-      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
-    if (
-      interaction.guild.members.me.voice.channelId &&
-      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
-    )
-      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
-
-    if (!queue || !queue.isPlaying())
-      return interaction.reply({ content: `❌ | No music is currently being played!`, ephemeral: true });
-
-    const queuedTracks = queue.tracks.toArray();
-    if (!queuedTracks[0])
-      return interaction.reply({ content: `❌ | There is no music is currently in the queue!`, ephemeral: true });
-
-    const skipembed = new EmbedBuilder()
-      .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-      .setThumbnail(queue.currentTrack.thumbnail)
-      .setColor('#FF0000')
-      .setTitle(`Song skipped ⏭️`)
-      .setDescription(
-        `Now playing: ${queuedTracks[0].title} ${
-          queuedTracks[0].queryType != 'arbitrary' ? `([Link](${queuedTracks[0].url}))` : ''
-        }`,
-      )
-      .setTimestamp()
-      .setFooter({
-        text: `Requested by: ${interaction.user.discriminator != 0 ? interaction.user.tag : interaction.user.username}`,
-      });
-
     try {
+      await interaction.deferReply();
+      const queue = player.nodes.get(interaction.guild.id);
+      if (!await validateVoiceChannel(interaction)) return;
+      if (!await isPlaying(queue, interaction)) return;
+
+      const queuedTracks = queue.tracks.toArray();
+      if (!queuedTracks[0])
+        return interaction.followUp({ content: `❌ | There is no music is currently in the queue!`, ephemeral: true });
+
+      const skipembed = createSkipEmbed(queue, queuedTracks, interaction);
+
       queue.node.skip();
-      interaction.reply({ embeds: [skipembed] });
+      interaction.followUp({ embeds: [skipembed] });
     } catch (err) {
-      interaction.reply({
+      interaction.followUp({
         content: `❌ | Ooops... something went wrong, there was an error skipping the song. Please try again.`,
         ephemeral: true,
       });

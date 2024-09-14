@@ -1,4 +1,9 @@
-const { validateVoiceChannel, player, createQueueEmbed, createQueueButtons } = require('../../../Structures/music');
+const { 
+  validation: { validateVoiceChannel, isPlaying },
+  player: { player },
+  embeds: { createQueueEmbed },
+  buttons: { createQueueButtons }
+} = require('../../../Structures/music');
 
 module.exports = {
   name: 'queue',
@@ -6,15 +11,11 @@ module.exports = {
   description: 'Shows the first 10 songs in the queue with pagination.',
   guildCooldown: 1000,
   run: async (client, interaction) => {
-    await interaction.deferReply();
-
     try {
+      await interaction.deferReply();
+      const queue = player.nodes.get(interaction.guild.id);
       if (!await validateVoiceChannel(interaction)) return;
-
-      const queue = player.nodes.get(interaction.guildId);
-      if (!queue || !queue.isPlaying()) {
-        return interaction.followUp({ content: '❌ | No music is currently playing!', ephemeral: true });
-      }
+      if (!await isPlaying(queue, interaction)) return;
 
       const queuedTracks = queue.tracks.toArray();
       if (!queuedTracks.length) {
@@ -64,7 +65,6 @@ module.exports = {
         message.edit({ components: [] });
       });
     } catch (error) {
-      console.error(error);
       return interaction.followUp({
         content: 'An error occurred while trying to show the queue',
         ephemeral: true,

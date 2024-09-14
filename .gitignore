@@ -1,6 +1,8 @@
 node_modules/
 json.sqlite
+package-lock.json
 guildCooldownDB.sqlite
 globalCooldownDB.sqlite
 channelCooldownDB.sqlite
 .prettierrc
+Src/Credentials/

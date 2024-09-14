@@ -1,76 +1,67 @@
-const { useQueue } = require('discord-player');
-const { EmbedBuilder, ActionRowBuilder, TextInputBuilder, ModalBuilder } = require('discord.js');
+const { ActionRowBuilder, TextInputBuilder, ModalBuilder } = require('discord.js');
+const { 
+  validation: { validateVoiceChannel, isPlaying },
+  player: { player },
+  embeds: { createVolumeEmbed },
+} = require('../../Structures/music');
 
 module.exports = {
   name: 'np-volumeadjust',
   run: async (client, interaction) => {
-    const queue = useQueue(interaction.guildId);
+    try {
+      const queue = player.nodes.get(interaction.guild.id);
 
-    if (!interaction.member.voice.channelId)
-      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
-    if (
-      interaction.guild.members.me.voice.channelId &&
-      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
-    )
-      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
+      if (!await validateVoiceChannel(interaction)) return;
+      if (!await isPlaying(queue, interaction)) return;
 
-    if (!queue || !queue.isPlaying())
-      return interaction.reply({ content: `❌ | No music is currently being played!`, ephemeral: true });
+      const modal = new ModalBuilder()
+        .setCustomId(`adjust_volume_${interaction.guild.id}`)
+        .setTitle(`Adjust Volume - Currently at ${queue.node.volume}%`)
+        .addComponents([
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('volume-input')
+              .setLabel(`Enter new volume (0-100)`)
+              .setStyle(1)
+              .setMinLength(1)
+              .setMaxLength(3)
+              .setPlaceholder('Volume (0-100)')
+              .setRequired(true),
+          ),
+        ]);
 
-    const modal = new ModalBuilder()
-      .setCustomId(`adjust_volume_${interaction.guild.id}`)
-      .setTitle(`Adjsut Volume - Currently at ${queue.node.volume}%`)
-      .addComponents([
-        new ActionRowBuilder().addComponents(
-          new TextInputBuilder()
-            .setCustomId('volume-input')
-            .setLabel(`What should the new volume be (0-100)?`)
-            .setStyle(1)
-            .setMinLength(1)
-            .setMaxLength(6)
-            .setPlaceholder('Your answer...')
-            .setRequired(true),
-        ),
-      ]);
+      await interaction.showModal(modal);
 
-    await interaction.showModal(modal);
+      const filter = i => i.customId === `adjust_volume_${interaction.guild.id}`;
+      const submitted = await interaction.awaitModalSubmit({ filter, time: 240000 });
 
-    const filter = interaction => interaction.customId.includes(`adjust_volume_${interaction.guild.id}`);
-    interaction
-      .awaitModalSubmit({ filter, time: 240000 })
-      .then(async submit => {
-        var userResponse = submit.fields.getTextInputValue('volume-input');
+      let vol = submitted.fields.getTextInputValue('volume-input');
 
-        if (userResponse < 0 || userResponse > 100 || isNaN(userResponse))
-          return submit.reply({
-            content: '❌ | The volume must be between 0-100, your input was outside of this.',
-            ephemeral: true,
-          });
+      vol = Number(vol);
+      if (isNaN(vol) || vol < 0 || vol > 100) {
+        return submitted.reply({
+          content: '❌ | Volume must be a number between 0 and 100.',
+          ephemeral: true,
+        });
+      }
 
-        const volumeembed = new EmbedBuilder()
-          .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-          .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-          .setColor('#FF0000')
-          .setTitle(`Volume adjusted 🎧`)
-          .setDescription(`The volume has been set to **${userResponse}%**!`)
-          .setTimestamp()
-          .setFooter({
-            text: `Requested by: ${
-              interaction.user.discriminator != 0 ? interaction.user.tag : interaction.user.username
-            }`,
-          });
+      queue.node.setVolume(vol);
+      const volumeEmbed = createVolumeEmbed(vol, interaction);
+      await submitted.reply({ embeds: [volumeEmbed] });
 
-        try {
-          queue.node.setVolume(Number(userResponse));
-          submit.reply({ embeds: [volumeembed] });
-        } catch (err) {
-          console.log(err);
-          submit.reply({
-            content: `❌ | Ooops... something went wrong, there was an error adjusting the volume. Please try again.`,
-            ephemeral: true,
-          });
-        }
-      })
-      .catch(console.error);
+    } catch (err) {
+      console.error(err);
+      if (interaction.replied) {
+        interaction.reply({
+          content: `❌ | Oops, something went wrong. Please try again.`,
+          ephemeral: true,
+        });
+      } else {
+        interaction.reply({
+          content: `❌ | Oops, something went wrong. Please try again.`,
+          ephemeral: true,
+        });
+      }
+    }
   },
 };

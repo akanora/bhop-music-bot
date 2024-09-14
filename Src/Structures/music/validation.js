@@ -1,3 +1,11 @@
+async function isPlaying(queue, interaction){
+  if (!queue || !queue.isPlaying()) {
+    interaction.followUp({ content: `❌ | No music is currently being played!`, ephemeral: true });
+    return false;
+  }
+  return true;
+}
+
 async function validateVoiceChannel(interaction) {
   if (!interaction.member.voice.channelId) {
     await interaction.followUp({ content: '❌ | You are not in a voice channel!', ephemeral: true });
@@ -13,4 +21,4 @@ async function validateVoiceChannel(interaction) {
   return true;
 }
 
-module.exports = { validateVoiceChannel };
+module.exports = { validateVoiceChannel, isPlaying };

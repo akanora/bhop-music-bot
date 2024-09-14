@@ -1,6 +1,14 @@
 module.exports = {
   name: 'np-delete',
   run: async (client, interaction) => {
-    interaction.message.delete();
+    try {
+      interaction.message.delete();
+    } catch {
+      interaction.reply({
+        //can't trust discord XD
+        content: `❌ | Oops, something went wrong. Please try again.`,
+        ephemeral: true,
+      });
+    } 
   },
 };

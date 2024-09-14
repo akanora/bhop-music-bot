@@ -1,11 +1,9 @@
 const { QueryType } = require('discord-player');
 const { 
-  validateVoiceChannel, 
-  playTrack, 
-  buildSuccessMessage, 
-  player 
+  validation: { validateVoiceChannel },
+  player: { player, playTrack, buildSuccessMessage },
+  autocomplete: { handleAutocomplete }
 } = require('../../../Structures/music');
-const { handleAutocomplete } = require('../../../Structures/music/autocomplete');
 
 module.exports = {
   name: 'play',
@@ -26,10 +24,10 @@ module.exports = {
     await interaction.respond(results);
   },
   run: async (client, interaction) => {
-    await interaction.deferReply();
-    const query = interaction.options.getString('query', true);
-
     try {
+      await interaction.deferReply();
+      const query = interaction.options.getString('query', true);
+      
       if (!await validateVoiceChannel(interaction)) return;
 
       const searchResult = await player.search(query, { requestedBy: interaction.user, searchEngine: QueryType.AUTO });
@@ -45,7 +43,6 @@ module.exports = {
 
       return interaction.followUp({ content: message });
     } catch (error) {
-      console.error(error);
       return interaction.followUp({
         content: 'An error occurred while trying to play the track',
         ephemeral: true,

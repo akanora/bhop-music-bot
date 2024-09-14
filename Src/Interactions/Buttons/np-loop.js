@@ -1,60 +1,69 @@
-const { QueueRepeatMode, useQueue } = require('discord-player');
-const { EmbedBuilder } = require('discord.js');
+const { QueueRepeatMode } = require('discord-player');
+const { 
+  validation: { validateVoiceChannel, isPlaying },
+  player: { player },
+  embeds: { createLoopEmbed },
+} = require('../../Structures/music');
 
 module.exports = {
   name: 'np-loop',
   run: async (client, interaction) => {
-    const queue = useQueue(interaction.guildId);
+    try {
+      await interaction.deferReply();
+      const queue = player.nodes.get(interaction.guild.id);
+      if (!await validateVoiceChannel(interaction)) return;
+      if (!await isPlaying(queue, interaction)) return;
 
-    if (!interaction.member.voice.channelId)
-      return await interaction.reply({ content: '❌ | You are not in a voice channel!', ephemeral: true });
-    if (
-      interaction.guild.members.me.voice.channelId &&
-      interaction.member.voice.channelId !== interaction.guild.members.me.voice.channelId
-    )
-      return await interaction.reply({ content: '❌ | You are not in my voice channel!', ephemeral: true });
+      if (queue.repeatMode === QueueRepeatMode.OFF) {
+        const loopmode = QueueRepeatMode.TRACK;
+        queue.setRepeatMode(loopmode);
 
-    if (!queue || !queue.isPlaying())
-      return interaction.reply({ content: `❌ | No music is currently being played!`, ephemeral: true });
+        const mode = 'Loop mode on 🔂';
+        const loopembed = createLoopEmbed(mode, "track", interaction);
 
-    if (queue.repeatMode === QueueRepeatMode.TRACK) {
-      const loopmode = QueueRepeatMode.OFF;
-      queue.setRepeatMode(loopmode);
+        interaction.followUp({ embeds: [loopembed] });
 
-      const mode = 'Loop mode off 📴';
-      const loopembed = new EmbedBuilder()
-        .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-        .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-        .setColor('#FF0000')
-        .setTitle(mode)
-        .setDescription(`The loop mode has been set to **off**!`)
-        .setTimestamp()
-        .setFooter({
-          text: `Requested by: ${
-            interaction.user.discriminator != 0 ? interaction.user.tag : interaction.user.username
-          }`,
-        });
+        return;
+      }
+      
+      if (queue.repeatMode === QueueRepeatMode.TRACK) {
+        const loopmode = QueueRepeatMode.QUEUE;
+        queue.setRepeatMode(loopmode);
 
-      interaction.reply({ embeds: [loopembed] });
-    } else {
-      const loopmode = QueueRepeatMode.TRACK;
-      queue.setRepeatMode(loopmode);
+        const mode = 'Loop mode on 🔂';
+        const loopembed = createLoopEmbed(mode, "queue", interaction);
 
-      const mode = 'Loop mode on 🔂';
-      const loopembed = new EmbedBuilder()
-        .setAuthor({ name: interaction.client.user.tag, iconURL: interaction.client.user.displayAvatarURL() })
-        .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
-        .setColor('#FF0000')
-        .setTitle(mode)
-        .setDescription(`The loop mode has been set to the **current track**!`)
-        .setTimestamp()
-        .setFooter({
-          text: `Requested by: ${
-            interaction.user.discriminator != 0 ? interaction.user.tag : interaction.user.username
-          }`,
-        });
+        interaction.followUp({ embeds: [loopembed] });
 
-      interaction.reply({ embeds: [loopembed] });
+        return;
+      } 
+      if (queue.repeatMode === QueueRepeatMode.QUEUE) {
+        const loopmode = QueueRepeatMode.AUTOPLAY;
+        queue.setRepeatMode(loopmode);
+
+        const mode = 'Loop mode on 🔂';
+        const loopembed = createLoopEmbed(mode, "autoplay", interaction);
+
+        interaction.followUp({ embeds: [loopembed] });
+
+        return;
+      } 
+      if (queue.repeatMode === QueueRepeatMode.AUTOPLAY) {
+        const loopmode = QueueRepeatMode.OFF;
+        queue.setRepeatMode(loopmode);
+
+        const mode = 'Loop mode off 📴';
+        const loopembed = createLoopEmbed(mode, "off", interaction);
+
+        interaction.followUp({ embeds: [loopembed] });
+
+        return;
+      } 
+    } catch (err) {
+      interaction.followUp({
+        content: `❌ | Ooops... something went wrong, there was an error switching loop mode. Please try again.`,
+        ephemeral: true,
+      });
     }
   },
 };
